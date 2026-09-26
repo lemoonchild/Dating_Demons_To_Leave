@@ -16,13 +16,14 @@ local DemonArt = require("src.graphics.DemonArt")
 local HubWorldRenderSystem = { name = "hubWorldRender" }
 
 local FLOOR_Y = 290
+local MARGIN = 400 -- el mundo es más ancho que la pantalla: la cámara se mueve
 
 local function drawCircle()
     -- fondo y suelo
     love.graphics.setColor(0.12, 0.05, 0.1, 1)
-    love.graphics.rectangle("fill", -40, -40, Screen.w + 80, Screen.h + 80)
+    love.graphics.rectangle("fill", -MARGIN, -MARGIN, Screen.w + 2 * MARGIN, Screen.h + 2 * MARGIN)
     love.graphics.setColor(0.25, 0.1, 0.08, 1)
-    love.graphics.rectangle("fill", -40, FLOOR_Y, Screen.w + 80, Screen.h)
+    love.graphics.rectangle("fill", -MARGIN, FLOOR_Y, Screen.w + 2 * MARGIN, Screen.h + MARGIN)
 
     -- la puerta del guardián, al fondo
     love.graphics.setColor(0.05, 0.02, 0.03, 1)
