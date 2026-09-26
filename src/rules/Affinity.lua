@@ -1,22 +1,10 @@
--- Las reglas de "caerle bien" a un demonio. Módulo PURO: no toca el World,
--- ni escenas, ni love.*, así que tests/affinity.lua lo prueba sin ventana.
--- AffinitySystem es el adaptador delgado que lo conecta con los eventos.
---
---   afinidad  MIN..MAX, sube o baja según tu respuesta. Puede ser NEGATIVA:
---             un demonio que te detesta (base para mecánicas futuras)
---   stat      si la respuesta le gustó, sube la stat que ese demonio enseña
---   cartas    al cruzar cada umbral te regala su siguiente carta. El conteo
---             de cartas entregadas nunca baja: si pierdes afinidad y la
---             recuperas, no te regala la misma carta dos veces.
-
 local Affinity = {}
 
 Affinity.MIN = -10
 Affinity.MAX = 10
 Affinity.THRESHOLDS = { 3, 6, 9 } -- umbral i -> carta i del demonio
 
--- Aplica una respuesta. Modifica runState y devuelve qué pasó:
---   { affinity = nuevo valor, delta = cambio real, stat = cuánto subió, cards = {cartas nuevas} }
+-- Aplica una respuesta.
 function Affinity.apply(runState, demon, option)
     local before = runState.affinity[demon.id] or 0
     local after = math.max(Affinity.MIN, math.min(Affinity.MAX, before + (option.affinity or 0)))
@@ -34,7 +22,6 @@ function Affinity.apply(runState, demon, option)
         and demon.cards[given + 1] do
         given = given + 1
         local card = demon.cards[given]
-        -- copia plana: la colección no debe compartir tablas con los datos
         local copy = { name = card.name, stat = card.stat, power = card.power, from = demon.id }
         runState.cards[#runState.cards + 1] = copy
         gained[#gained + 1] = copy
@@ -44,7 +31,7 @@ function Affinity.apply(runState, demon, option)
     return { affinity = after, delta = after - before, stat = statGain, cards = gained }
 end
 
--- -1..1 para barras de UI: negativo = te detesta, positivo = le agradas.
+-- negativo = el demonio detesta al jugador, positivo = le agrada.
 function Affinity.ratio(value)
     if value < 0 then
         return -value / Affinity.MIN

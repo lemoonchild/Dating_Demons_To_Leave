@@ -1,7 +1,6 @@
--- UI 2: la caja de diálogo con los demonios. Es el corazón del dating sim:
--- lo que respondes decide cuánto le agradas a cada demonio.
+-- UI 2: la caja de diálogo con los demonios. 
 --
---   Setup   crea las fuentes y la entidad `dialogue` (con quién hablas,
+--   Setup   crea las fuentes y la entidad `dialogue` (con quién habla el jugador,
 --           texto, cuántas letras se ven, cursor, etapa) y abre la
 --           primera conversación
 --   Update  avanza el efecto de máquina de escribir con dt y lee el input:
@@ -10,14 +9,9 @@
 --           menú. Al responder NO toca
 --           la afinidad: solo anuncia un evento `dialogueChoice`, y
 --           AffinitySystem aplica las reglas en este mismo frame
---   Render  en espacio de pantalla: la caja, el nombre del demonio, su
---           retrato, el texto visible y las respuestas. Figuras simples:
---           el retrato es un placeholder hasta tener el pixel art
+--   Render  la caja, el nombre del demonio, su
+--           retrato, el texto visible y las respuestas. 
 --
--- Etapas de `dialogue.stage`:
---   line      el demonio habla; al terminar de escribirse, eliges respuesta
---   reaction  el demonio reacciona; Enter pasa a su siguiente conversación
---   done      ya te dijo todo; cambia de demonio
 
 local Screen = require("src.Screen")
 local demons = require("src.data.demons")

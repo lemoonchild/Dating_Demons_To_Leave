@@ -1,11 +1,4 @@
--- Aplica las consecuencias de lo que respondiste. NO es UI: la caja de
--- diálogo solo anuncia "elegí la opción X" con un evento `dialogueChoice`;
--- este sistema lo lee, aplica las reglas (src/rules/Affinity.lua) sobre la
--- partida y, si un demonio te regaló una carta, anuncia `cardGained` para
--- que el HUD reaccione en este mismo frame.
---
---   dialogueChoice { demonId, conversation, option }  ->  runState
---                                                     ->  cardGained { demonId, card }
+-- Aplica las consecuencias de lo que respondió el jugador. 
 
 local demons = require("src.data.demons")
 local Affinity = require("src.rules.Affinity")

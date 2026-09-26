@@ -1,13 +1,9 @@
--- Dibuja el MUNDO del hub: el círculo del infierno y los demonios que
--- viven ahí. Solo dibuja; no es UI. Figuras simples como placeholder hasta
--- tener el arte en pixel art.
+-- Dibuja el mundo del hub: el círculo del infierno y los demonios que
+-- viven ahí. 
 --
 -- Todo pasa por la cámara (resource `camera`): si la cámara se mueve, el
 -- mundo se mueve. La UI (diálogo, HUD) se dibuja después, en espacio de
 -- pantalla, y no se entera.
---
--- Resalta al demonio con el que estás hablando (lo lee del componente
--- `dialogue`) y deja a los demás en penumbra.
 
 local Screen = require("src.Screen")
 local demons = require("src.data.demons")

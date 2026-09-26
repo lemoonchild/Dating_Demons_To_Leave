@@ -1,12 +1,4 @@
--- Cómo se ve un demonio. Por ahora es un PLACEHOLDER: un rectángulo de su
--- color. Lo comparten el mundo (HubWorldRenderSystem) y el retrato del
--- diálogo (DialogueUISystem), así que cuando existan los sprites en pixel
--- art solo cambia esta función.
---
---   DemonArt.draw(demon, x, y, w, h, shade)
---     x, y   el punto entre los pies (centro de la base)
---     w, h   tamaño del rectángulo
---     shade  0..1: 1 = color normal, menos = en penumbra
+-- Cómo se ve un demonio. Por ahora es un rectángulo de su color.
 
 local DemonArt = {}
 

@@ -1,4 +1,4 @@
--- El menú principal: la primera pantalla del juego. Una sola UI.
+-- El menú principal: la primera pantalla del juego.
 
 local Scene = require("src.ecs.Scene")
 local MainMenuUISystem = require("src.systems.MainMenuUISystem")

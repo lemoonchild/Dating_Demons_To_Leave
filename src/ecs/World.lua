@@ -2,10 +2,7 @@
 --
 -- Entidad: Es solo un número
 -- Componente: Guardados en tablas separadas por tipo
--- Sistema: Una tabla con hooks setup/update/draw/unload que recorre los
---          componentes que le interesan (ver src/ecs/Scene.lua).
---
--- El World NO tiene lógica: solo guarda datos. La lógica vive en los sistemas.
+-- Sistema: Una tabla con hooks 
 
 local World = {}
 World.__index = World

@@ -1,7 +1,4 @@
--- La cámara del mundo se desliza hacia el demonio con el que hablas.
--- No es UI: mueve el resource `camera`, que solo usa HubWorldRenderSystem.
--- Sirve para demostrar la separación: el mundo se mueve, la caja de
--- diálogo y el HUD (en espacio de pantalla) se quedan quietos.
+-- La cámara del mundo se desliza hacia el demonio con el que habla el jugador.
 
 local Screen = require("src.Screen")
 local demons = require("src.data.demons")

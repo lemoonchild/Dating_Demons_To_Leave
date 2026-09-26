@@ -1,14 +1,10 @@
--- Los demonios que te pueden ayudar a escapar: CONTENIDO, no código.
--- Este archivo es solo una tabla. Los sistemas lo leen; aquí nada puede
--- tener un bug que no sea un typo. Nombres, textos y números son
--- placeholders: edítalos libremente.
+-- Listado de los demonios que pueden ayudar al jugador a escapar 
 --
 -- Cada demonio:
---   stat           la estadística que te enseña cuando le caes bien
---   cards          las cartas que te regala al cruzar cada umbral de afinidad
+--   stat           la estadística que le enseña al jugador cuando le cae bien
+--   cards          las cartas que le regala al jugador al cruzar cada umbral de afinidad
 --                  (ver src/rules/Affinity.lua), en orden
---   conversations  lo que te dice; cada opción mueve la afinidad y
---                  (si le gustó) te sube su stat
+--   conversations  lo que le dice al jugador
 
 local demons = {
     {

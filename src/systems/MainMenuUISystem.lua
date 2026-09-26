@@ -1,17 +1,4 @@
 -- UI 1: el menú principal. Jugar / Créditos / Salir.
---
---   Setup   crea las fuentes y la entidad `menu` (opciones, cursor,
---           posiciones, panel de créditos cerrado)
---   Update  lee el input (teclado como eventos `keyPressed`, mouse como
---           hover + evento `mousePressed`), mueve el cursor y decide:
---           Jugar pide el cambio a la escena "hub" con una partida NUEVA,
---           Créditos abre/cierra el panel, Salir cierra el juego
---   Render  fondo, título, opciones (la elegida resaltada), ayuda de
---           controles y, encima de todo, el panel de créditos. Figuras
---           simples: placeholder hasta tener el arte en pixel art
---
--- El menú no sabe nada del hub: solo crea un `switchRequest` y el Game
--- hace el cambio al terminar el frame.
 
 local Screen = require("src.Screen")
 local run = require("src.data.run")
@@ -21,8 +8,6 @@ local MainMenuUISystem = { name = "mainMenuUI" }
 local fonts = {}
 
 local OPTION_W, OPTION_H, SPACING = 260, 44, 56
-
--- ---------------------------------------------------------------- setup
 
 function MainMenuUISystem.setup(scene)
     fonts.title = love.graphics.newFont(48)
@@ -46,10 +31,8 @@ function MainMenuUISystem.setup(scene)
 end
 
 function MainMenuUISystem.unload(scene)
-    fonts = {} -- soltar las referencias; el GC recoge las fuentes
+    fonts = {} 
 end
-
--- --------------------------------------------------------------- update
 
 local function optionAt(menu, mx, my)
     for i = 1, #menu.options do
@@ -75,7 +58,6 @@ function MainMenuUISystem.update(scene, dt)
     local world = scene.world
     local _, menu = world:first("menu")
 
-    -- con los créditos abiertos, cualquier tecla o clic los cierra
     if menu.showCredits then
         if #world:query("keyPressed") > 0 or #world:query("mousePressed") > 0 then
             menu.showCredits = false
@@ -83,7 +65,6 @@ function MainMenuUISystem.update(scene, dt)
         return
     end
 
-    -- mouse: el hover mueve el cursor (estado continuo, se consulta cada frame)
     local mx, my = love.mouse.getPosition()
     local hovered = optionAt(menu, mx, my)
     if hovered and (mx ~= menu.lastMouseX or my ~= menu.lastMouseY) then
@@ -100,7 +81,6 @@ function MainMenuUISystem.update(scene, dt)
         end
     end
 
-    -- teclado: acciones discretas, llegan como eventos
     for _, entity in ipairs(world:query("keyPressed")) do
         local key = world:getComponent(entity, "keyPressed").key
         if key == "up" or key == "w" then
@@ -114,8 +94,6 @@ function MainMenuUISystem.update(scene, dt)
         end
     end
 end
-
--- --------------------------------------------------------------- render
 
 local function drawCredits()
     love.graphics.setColor(0, 0, 0, 0.7)
@@ -144,7 +122,6 @@ end
 function MainMenuUISystem.draw(scene)
     local _, menu = scene.world:first("menu")
 
-    -- fondo plano
     love.graphics.setColor(0.12, 0.05, 0.1, 1)
     love.graphics.rectangle("fill", 0, 0, Screen.w, Screen.h)
 
