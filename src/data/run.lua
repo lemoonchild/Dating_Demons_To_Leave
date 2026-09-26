@@ -11,7 +11,7 @@ function run.new()
         circle = 1, -- índice en src/data/circles.lua
         stats = { astucia = 1, encanto = 1, furia = 1 },
         cards = {}, -- cartas que te regalaron los demonios
-        affinity = {}, -- demonId -> 0..Affinity.MAX
+        affinity = {}, -- demonId -> Affinity.MIN..Affinity.MAX (puede ser negativa)
         rewards = {}, -- demonId -> cuántas cartas ya te dio (nunca baja)
         talks = {}, -- demonId -> índice de la próxima conversación
     }

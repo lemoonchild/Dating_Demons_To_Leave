@@ -42,10 +42,16 @@ Affinity.apply(run, demon, bad) -- 2
 r = Affinity.apply(run, demon, good) -- 4
 assert(#r.cards == 0 and #run.cards == 1, "regaló la misma carta dos veces")
 
--- La afinidad nunca sale de 0..MAX.
+-- La afinidad PUEDE ser negativa: un demonio que te detesta.
 local low = newRun()
-Affinity.apply(low, demon, bad)
-assert(low.affinity.test == 0, "la afinidad bajó de 0")
+local r2 = Affinity.apply(low, demon, bad)
+assert(low.affinity.test == -1 and r2.delta == -1, "la afinidad no bajó de 0")
+assert(low.stats.astucia == 1, "una mala respuesta cambió la stat")
+
+-- ...pero nunca sale de MIN..MAX.
+for _ = 1, 20 do Affinity.apply(low, demon, bad) end
+assert(low.affinity.test == Affinity.MIN, "la afinidad pasó el mínimo")
+assert(#low.cards == 0, "un demonio que te detesta regaló cartas")
 local high = newRun()
 for _ = 1, 20 do Affinity.apply(high, demon, good) end
 assert(high.affinity.test == Affinity.MAX, "la afinidad pasó el máximo")
@@ -63,5 +69,9 @@ assert(#r.cards == 2, "un salto de dos umbrales no entregó dos cartas")
 -- La carta de la colección es una copia, no la tabla de datos.
 high.cards[1].power = 99
 assert(demon.cards[1].power == 1, "la colección comparte tablas con los datos")
+
+-- ratio para las barras: -1 en el mínimo, 0 en neutral, 1 en el máximo.
+assert(Affinity.ratio(Affinity.MIN) == -1 and Affinity.ratio(0) == 0 and Affinity.ratio(Affinity.MAX) == 1,
+    "ratio fuera de -1..1")
 
 print("affinity tests passed")

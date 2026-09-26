@@ -117,6 +117,26 @@ local function bar(x, y, ratio, color)
     love.graphics.rectangle("line", x, y, BAR_W, BAR_H)
 end
 
+-- Barra con el 0 al centro, para la afinidad (-1..1): hacia la derecha
+-- con el color del demonio si le agradas, hacia la izquierda en rojo si
+-- te detesta.
+local function centeredBar(x, y, ratio, color)
+    ratio = math.max(-1, math.min(1, ratio))
+    local half = BAR_W / 2
+    love.graphics.setColor(0.25, 0.25, 0.25, 1)
+    love.graphics.rectangle("fill", x, y, BAR_W, BAR_H)
+    if ratio >= 0 then
+        love.graphics.setColor(color[1], color[2], color[3], 1)
+        love.graphics.rectangle("fill", x + half, y, half * ratio, BAR_H)
+    else
+        love.graphics.setColor(0.9, 0.2, 0.2, 1)
+        love.graphics.rectangle("fill", x + half + half * ratio, y, -half * ratio, BAR_H)
+    end
+    love.graphics.setColor(1, 1, 1, 1)
+    love.graphics.rectangle("line", x, y, BAR_W, BAR_H)
+    love.graphics.line(x + half, y - 2, x + half, y + BAR_H + 2) -- el 0
+end
+
 -- Panel izquierdo: dónde estás y tus stats.
 local function drawStatus(runState, hud)
     local x, y = 10, 10
@@ -154,7 +174,7 @@ local function drawRelations(runState, hud)
         local ry = y + 34 + (i - 1) * 24
         love.graphics.setColor(1, 1, 1, 1)
         love.graphics.print(demon.name, x + 10, ry)
-        bar(x + 90, ry + 3, Affinity.ratio(hud.shown.affinity[demon.id]), demon.color)
+        centeredBar(x + 90, ry + 3, Affinity.ratio(hud.shown.affinity[demon.id]), demon.color)
         love.graphics.print(("%d/%d"):format(runState.affinity[demon.id], Affinity.MAX), x + 90 + BAR_W + 10, ry)
     end
 end

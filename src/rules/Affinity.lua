@@ -2,7 +2,8 @@
 -- ni escenas, ni love.*, así que tests/affinity.lua lo prueba sin ventana.
 -- AffinitySystem es el adaptador delgado que lo conecta con los eventos.
 --
---   afinidad  0..MAX, sube o baja según tu respuesta
+--   afinidad  MIN..MAX, sube o baja según tu respuesta. Puede ser NEGATIVA:
+--             un demonio que te detesta (base para mecánicas futuras)
 --   stat      si la respuesta le gustó, sube la stat que ese demonio enseña
 --   cartas    al cruzar cada umbral te regala su siguiente carta. El conteo
 --             de cartas entregadas nunca baja: si pierdes afinidad y la
@@ -10,6 +11,7 @@
 
 local Affinity = {}
 
+Affinity.MIN = -10
 Affinity.MAX = 10
 Affinity.THRESHOLDS = { 3, 6, 9 } -- umbral i -> carta i del demonio
 
@@ -17,7 +19,7 @@ Affinity.THRESHOLDS = { 3, 6, 9 } -- umbral i -> carta i del demonio
 --   { affinity = nuevo valor, delta = cambio real, stat = cuánto subió, cards = {cartas nuevas} }
 function Affinity.apply(runState, demon, option)
     local before = runState.affinity[demon.id] or 0
-    local after = math.max(0, math.min(Affinity.MAX, before + (option.affinity or 0)))
+    local after = math.max(Affinity.MIN, math.min(Affinity.MAX, before + (option.affinity or 0)))
     runState.affinity[demon.id] = after
 
     local statGain = option.stat or 0
@@ -42,8 +44,11 @@ function Affinity.apply(runState, demon, option)
     return { affinity = after, delta = after - before, stat = statGain, cards = gained }
 end
 
--- 0..1, para barras de UI.
+-- -1..1 para barras de UI: negativo = te detesta, positivo = le agradas.
 function Affinity.ratio(value)
+    if value < 0 then
+        return -value / Affinity.MIN
+    end
     return value / Affinity.MAX
 end
 
