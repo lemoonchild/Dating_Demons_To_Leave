@@ -64,6 +64,12 @@ function Game.keypressed(key)
     current.world:spawn({ event = true, keyPressed = { key = key } })
 end
 
+-- Los clics también entran como DATO. (El hover no: es estado continuo,
+-- los sistemas lo consultan con love.mouse.getPosition cada frame.)
+function Game.mousepressed(x, y, button)
+    current.world:spawn({ event = true, mousePressed = { x = x, y = y, button = button } })
+end
+
 function Game.quit()
     if current then current:unload() end
 end
