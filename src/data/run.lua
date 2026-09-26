@@ -13,10 +13,12 @@ function run.new()
         cards = {}, -- cartas que te regalaron los demonios
         affinity = {}, -- demonId -> 0..Affinity.MAX
         rewards = {}, -- demonId -> cuántas cartas ya te dio (nunca baja)
+        talks = {}, -- demonId -> índice de la próxima conversación
     }
     for _, demon in ipairs(demons) do
         state.affinity[demon.id] = 0
         state.rewards[demon.id] = 0
+        state.talks[demon.id] = 1
     end
     return state
 end
