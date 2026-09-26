@@ -1,28 +1,36 @@
 -- Dating Demons To Leave
 --
--- Lo único que queda de Breakout es el motor ECS (src/ecs/World.lua).
--- El paddle, la pelota, los bloques, las colisiones y las constantes del
--- juego anterior se eliminaron: este main solo abre una ventana vacía
--- mientras se construye el juego nuevo encima del mismo World.
+-- Este archivo solo arranca el juego: registra las escenas, abre una y le
+-- pasa los callbacks de LÖVE al Game. Toda la lógica vive en los sistemas
+-- de cada escena (src/systems) sobre el World de src/ecs.
+--
+--   love .          abre el menú
+--   love . <scene>  abre directo una escena registrada
 
-local World = require("src.ecs.World")
+local Game = require("src.Game")
 
-local world
+function love.load(args)
+    Game.registerScene("menu", require("src.scenes.MenuScene"))
 
-function love.load()
-    love.window.setTitle("Dating Demons To Leave")
-    world = World.new()
+    local start = "menu"
+    if args[1] and Game.hasScene(args[1]) then
+        start = args[1]
+    end
+    Game.start(start)
 end
 
 function love.update(dt)
+    Game.update(dt)
 end
 
 function love.draw()
-    love.graphics.print("Dating Demons To Leave", 10, 10)
+    Game.draw()
 end
 
 function love.keypressed(key)
-    if key == "escape" then
-        love.event.quit()
-    end
+    Game.keypressed(key)
+end
+
+function love.quit()
+    Game.quit()
 end
