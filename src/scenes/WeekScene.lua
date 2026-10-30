@@ -1,7 +1,7 @@
--- El hub: un círculo del infierno donde el jugador habla con los demonios que lo pueden ayudar a escapar. 
+-- La semana: siete días en el infierno para ganarse a los demonios que pueden ayudar a escapar.
 
 local Scene = require("src.ecs.Scene")
-local run = require("src.data.run")
+local Run = require("src.state.Run")
 local demons = require("src.data.demons")
 
 local HubWorldRenderSystem = require("src.systems.HubWorldRenderSystem")
@@ -11,10 +11,10 @@ local CameraFollowSystem = require("src.systems.CameraFollowSystem")
 local HudUISystem = require("src.systems.HudUISystem")
 
 return function(payload)
-    local scene = Scene.new("hub")
+    local scene = Scene.new("week")
     local world = scene.world
 
-    world:setResource("runState", payload and payload.runState or run.new())
+    world:setResource("runState", Run.current())
     world:setResource("camera", { x = 0, y = 0 })
 
     local spacing = 260

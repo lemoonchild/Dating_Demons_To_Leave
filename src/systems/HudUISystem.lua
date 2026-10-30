@@ -1,12 +1,12 @@
 -- UI 3: el HUD del hub. Muestra dónde está el jugador y qué tan preparado
--- está para la puerta: el círculo y su guardián, sus stats, su afinidad con
+-- está para la puerta: el día de la semana, sus stats, su afinidad con
 -- cada demonio y cuántas cartas lleva. Cuando un demonio regala una carta,
 -- aparece un aviso.
 --
 
 local Screen = require("src.Screen")
 local demons = require("src.data.demons")
-local circles = require("src.data.circles")
+local Run = require("src.state.Run")
 local Affinity = require("src.rules.Affinity")
 
 local HudUISystem = { name = "hudUI" }
@@ -16,6 +16,7 @@ local fonts = {}
 local STATS = { "astucia", "encanto", "furia" }
 local STAT_MAX = 10 
 local PANEL_W, PANEL_H = 300, 112
+local PIP = 12
 local BAR_W, BAR_H = 140, 10
 local TOAST_TIME = 3
 local FILL_SPEED = 6 
@@ -117,20 +118,35 @@ local function centeredBar(x, y, ratio, color)
     love.graphics.line(x + half, y - 2, x + half, y + BAR_H + 2) -- el 0
 end
 
+local function drawWeek(runState, x, y)
+    for day = 1, Run.DAYS do
+        local px = x + (day - 1) * (PIP + 6)
+        if day < runState.day then
+            love.graphics.setColor(0.8, 0.3, 0.15, 1)
+            love.graphics.rectangle("fill", px, y, PIP, PIP)
+        elseif day == runState.day then
+            love.graphics.setColor(1, 0.85, 0.3, 1)
+            love.graphics.rectangle("fill", px, y, PIP, PIP)
+        else
+            love.graphics.setColor(0.3, 0.3, 0.3, 1)
+            love.graphics.rectangle("fill", px, y, PIP, PIP)
+        end
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.rectangle("line", px, y, PIP, PIP)
+    end
+end
+
 local function drawStatus(runState, hud)
     local x, y = 10, 10
     panel(x, y, PANEL_W, PANEL_H)
-    local circle = circles[runState.circle]
 
     love.graphics.setFont(fonts.title)
     love.graphics.setColor(1, 1, 1, 1)
-    love.graphics.print(("Círculo %d: %s"):format(runState.circle, circle.name), x + 10, y + 8)
-    love.graphics.setFont(fonts.text)
-    love.graphics.setColor(0.8, 0.8, 0.8, 1)
-    love.graphics.print("Guardián: " .. circle.guardian, x + 10, y + 28)
+    love.graphics.print(("Día %d / %d"):format(runState.day, Run.DAYS), x + 10, y + 8)
+    drawWeek(runState, x + 110, y + 12)
 
     for i, stat in ipairs(STATS) do
-        local ry = y + 50 + (i - 1) * 20
+        local ry = y + 40 + (i - 1) * 20
         love.graphics.setColor(1, 1, 1, 1)
         love.graphics.print(stat:sub(1, 1):upper() .. stat:sub(2), x + 10, ry)
         bar(x + 90, ry + 3, hud.shown.stats[stat] / STAT_MAX, { 0.9, 0.9, 0.9 })

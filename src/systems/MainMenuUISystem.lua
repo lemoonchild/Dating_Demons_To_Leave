@@ -1,7 +1,7 @@
 -- UI 1: el menú principal. Jugar / Créditos / Salir.
 
 local Screen = require("src.Screen")
-local run = require("src.data.run")
+local Run = require("src.state.Run")
 
 local MainMenuUISystem = { name = "mainMenuUI" }
 
@@ -46,7 +46,8 @@ end
 local function confirm(scene, menu)
     local option = menu.options[menu.cursor].id
     if option == "play" then
-        scene.world:spawn({ switchRequest = { to = "hub", payload = { runState = run.new() } } })
+        Run.start()
+        scene.world:spawn({ switchRequest = { to = "week" } })
     elseif option == "credits" then
         menu.showCredits = true
     elseif option == "quit" then

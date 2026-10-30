@@ -58,14 +58,19 @@ local function openLine(dialogue, runState)
     dialogue.picked = nil
 end
 
+local function currentOptions(dialogue, runState)
+    local demon = currentDemon(dialogue)
+    local conversation = demon.conversations[runState.talks[demon.id]]
+    return conversation and conversation.options
+end
+
 local function optionRect(i)
     return TEXT_X, OPTIONS_Y + (i - 1) * OPTION_H, TEXT_W, OPTION_H
 end
 
 local function optionAt(dialogue, runState, mx, my)
     if dialogue.stage ~= "line" or typing(dialogue) then return nil end
-    local demon = currentDemon(dialogue)
-    local options = demon.conversations[runState.talks[demon.id]].options
+    local options = currentOptions(dialogue, runState)
     for i = 1, #options do
         local x, y, w, h = optionRect(i)
         if mx >= x and mx <= x + w and my >= y and my < y + h then return i end
@@ -162,17 +167,19 @@ function DialogueUISystem.update(scene, dt)
     for _, entity in ipairs(world:query("keyPressed")) do
         local key = world:getComponent(entity, "keyPressed").key
         local choosing = dialogue.stage == "line" and not typing(dialogue)
+        local count = choosing and #currentOptions(dialogue, runState) or 0
+        local picked = tonumber(key)
 
         if key == "escape" then
             world:spawn({ switchRequest = { to = "menu" } })
         elseif key == "return" or key == "space" then
             advance(scene, dialogue, runState)
         elseif (key == "up" or key == "w") and choosing then
-            dialogue.cursor = (dialogue.cursor - 2) % 3 + 1
+            dialogue.cursor = (dialogue.cursor - 2) % count + 1
         elseif (key == "down" or key == "s") and choosing then
-            dialogue.cursor = dialogue.cursor % 3 + 1
-        elseif (key == "1" or key == "2" or key == "3") and choosing then
-            choose(scene, dialogue, runState, tonumber(key))
+            dialogue.cursor = dialogue.cursor % count + 1
+        elseif choosing and picked and picked >= 1 and picked <= count then
+            choose(scene, dialogue, runState, picked)
         elseif (key == "right" or key == "d" or key == "tab") and dialogue.stage ~= "reaction" then
             switchDemon(dialogue, runState, 1)
         elseif (key == "left" or key == "a") and dialogue.stage ~= "reaction" then
@@ -248,7 +255,7 @@ function DialogueUISystem.draw(scene)
     end
 
     if dialogue.stage == "line" then
-        local options = demon.conversations[runState.talks[demon.id]].options
+        local options = currentOptions(dialogue, runState)
         love.graphics.setFont(fonts.option)
         for i, option in ipairs(options) do
             local x, y, w, h = optionRect(i)
