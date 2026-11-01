@@ -2,6 +2,7 @@
 
 local demons = require("src.data.demons")
 local Affinity = require("src.rules.Affinity")
+local Mood = require("src.rules.Mood")
 
 local AffinitySystem = { name = "affinity" }
 
@@ -14,7 +15,8 @@ function AffinitySystem.update(scene, dt)
         local demon = demons[choice.demonId]
         local option = demon.conversations[choice.conversation].options[choice.option]
 
-        local result = Affinity.apply(runState, demon, option)
+        local gain = Mood.scale(option.affinity or 0, runState.moods[demon.id])
+        local result = Affinity.apply(runState, demon, option, gain)
         for _, card in ipairs(result.cards) do
             world:spawn({ event = true, cardGained = { demonId = demon.id, card = card } })
         end

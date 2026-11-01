@@ -16,6 +16,7 @@ function Run.new(seed)
         rewards = {},
         talks = {},
         moods = {},
+        bags = {},
         help = {},
         log = {},
     }

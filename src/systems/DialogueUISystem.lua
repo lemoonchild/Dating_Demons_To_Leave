@@ -5,8 +5,8 @@
 --           primera conversación
 --   Update  avanza el efecto de máquina de escribir con dt y lee el input:
 --           arriba/abajo o mouse eligen respuesta, Enter/clic/1-3
---           confirman, izq/der/Tab cambian de demonio, Esc vuelve al
---           menú. Al responder NO toca
+--           confirman. Solo corre en la fase `acting` del día, con el
+--           demonio que eligió el menú. Al responder NO toca
 --           la afinidad: solo anuncia un evento `dialogueChoice`, y
 --           AffinitySystem aplica las reglas en este mismo frame
 --   Render  la caja, el nombre del demonio, su
@@ -16,6 +16,7 @@
 local Screen = require("src.Screen")
 local demons = require("src.data.demons")
 local DemonArt = require("src.graphics.DemonArt")
+local Mood = require("src.rules.Mood")
 
 local DialogueUISystem = { name = "dialogueUI" }
 
@@ -34,7 +35,7 @@ local TYPE_SPEED = 45 -- letras por segundo
 -- ---------------------------------------------------------------- helpers
 
 local function currentDemon(dialogue)
-    return demons[dialogue.demonIndex]
+    return demons[dialogue.demonId]
 end
 
 local function typing(dialogue)
@@ -95,19 +96,15 @@ local function choose(scene, dialogue, runState, i)
     dialogue.picked = { affinity = option.affinity or 0, stat = option.stat or 0, statName = demon.stat }
 end
 
-local function switchDemon(dialogue, runState, step)
-    dialogue.demonIndex = (dialogue.demonIndex - 1 + step) % #demons + 1
-    openLine(dialogue, runState)
-end
-
 -- "Enter": completa el texto si se está escribiendo, si no avanza.
 local function advance(scene, dialogue, runState)
     if typing(dialogue) then
         dialogue.visible = #dialogue.text
     elseif dialogue.stage == "line" then
         choose(scene, dialogue, runState, dialogue.cursor)
-    elseif dialogue.stage == "reaction" then
-        openLine(dialogue, runState)
+    else
+        dialogue.demonId = nil
+        scene.world:spawn({ event = true, dayDone = true })
     end
 end
 
@@ -119,15 +116,14 @@ function DialogueUISystem.setup(scene)
     fonts.option = love.graphics.newFont(16)
     fonts.small = love.graphics.newFont(12)
 
-    local dialogue = {
-        demonIndex = 1,
-        stage = "line",
-        text = "",
-        visible = 0,
-        cursor = 1,
-    }
-    scene.world:spawn({ dialogue = dialogue })
-    openLine(dialogue, scene.world:resource("runState"))
+    scene.world:spawn({
+        dialogue = {
+            stage = "line",
+            text = "",
+            visible = 0,
+            cursor = 1,
+        },
+    })
 end
 
 function DialogueUISystem.unload(scene)
@@ -138,8 +134,16 @@ end
 
 function DialogueUISystem.update(scene, dt)
     local world = scene.world
+    local phase = world:resource("dayPhase")
+    if phase.phase ~= "acting" then return end
+
     local runState = world:resource("runState")
     local _, dialogue = world:first("dialogue")
+
+    if dialogue.demonId ~= phase.demonId then
+        dialogue.demonId = phase.demonId
+        openLine(dialogue, runState)
+    end
 
     dialogue.visible = math.min(#dialogue.text, dialogue.visible + TYPE_SPEED * dt)
 
@@ -170,9 +174,7 @@ function DialogueUISystem.update(scene, dt)
         local count = choosing and #currentOptions(dialogue, runState) or 0
         local picked = tonumber(key)
 
-        if key == "escape" then
-            world:spawn({ switchRequest = { to = "menu" } })
-        elseif key == "return" or key == "space" then
+        if key == "return" or key == "space" then
             advance(scene, dialogue, runState)
         elseif (key == "up" or key == "w") and choosing then
             dialogue.cursor = (dialogue.cursor - 2) % count + 1
@@ -180,10 +182,6 @@ function DialogueUISystem.update(scene, dt)
             dialogue.cursor = dialogue.cursor % count + 1
         elseif choosing and picked and picked >= 1 and picked <= count then
             choose(scene, dialogue, runState, picked)
-        elseif (key == "right" or key == "d" or key == "tab") and dialogue.stage ~= "reaction" then
-            switchDemon(dialogue, runState, 1)
-        elseif (key == "left" or key == "a") and dialogue.stage ~= "reaction" then
-            switchDemon(dialogue, runState, -1)
         end
     end
 end
@@ -218,9 +216,12 @@ end
 
 function DialogueUISystem.draw(scene)
     local world = scene.world
+    if world:resource("dayPhase").phase ~= "acting" then return end
+
     local runState = world:resource("runState")
     local _, dialogue = world:first("dialogue")
     local demon = currentDemon(dialogue)
+    if not demon then return end
 
     -- etiqueta con el nombre
     love.graphics.setColor(0.07, 0.03, 0.06, 1)
@@ -232,7 +233,7 @@ function DialogueUISystem.draw(scene)
 
     love.graphics.setFont(fonts.small)
     love.graphics.setColor(0.8, 0.8, 0.8, 1)
-    love.graphics.printf(("Demonio %d/%d   Izq/Der: cambiar   Esc: menú"):format(dialogue.demonIndex, #demons),
+    love.graphics.printf(Mood.of(runState.moods[demon.id]).name,
         TAG.x, TAG.y + 10, BOX.w, "right")
 
     -- la caja
@@ -283,7 +284,7 @@ function DialogueUISystem.draw(scene)
     if dialogue.stage ~= "line" then
         love.graphics.setFont(fonts.small)
         love.graphics.setColor(0.8, 0.8, 0.8, 1)
-        local hint = dialogue.stage == "reaction" and "Enter: continuar" or "Izq/Der: habla con otro demonio"
+        local hint = "Enter: terminar el día"
         love.graphics.printf(hint, BOX.x, BOX.y + BOX.h - 22, BOX.w - 16, "right")
     end
 

@@ -1,7 +1,6 @@
 -- La cámara del mundo se desliza hacia el demonio con el que habla el jugador.
 
 local Screen = require("src.Screen")
-local demons = require("src.data.demons")
 
 local CameraFollowSystem = { name = "cameraFollow" }
 
@@ -14,14 +13,14 @@ function CameraFollowSystem.update(scene, dt)
     local _, dialogue = world:first("dialogue")
     if not dialogue then return end
 
-    local talkingId = demons[dialogue.demonIndex].id
+    local targetX = 0
     for _, entity in ipairs(world:query("position", "demonSprite")) do
-        if world:getComponent(entity, "demonSprite").demonId == talkingId then
+        if world:getComponent(entity, "demonSprite").demonId == dialogue.demonId then
             local pos = world:getComponent(entity, "position")
-            local targetX = (pos.x - Screen.w / 2) * FOLLOW
-            camera.x = camera.x + (targetX - camera.x) * math.min(1, SPEED * dt)
+            targetX = (pos.x - Screen.w / 2) * FOLLOW
         end
     end
+    camera.x = camera.x + (targetX - camera.x) * math.min(1, SPEED * dt)
 end
 
 return CameraFollowSystem

@@ -5,9 +5,9 @@ Affinity.MAX = 10
 Affinity.THRESHOLDS = { 3, 6, 9 } -- umbral i -> carta i del demonio
 
 -- Aplica una respuesta.
-function Affinity.apply(runState, demon, option)
+function Affinity.apply(runState, demon, option, gain)
     local before = runState.affinity[demon.id] or 0
-    local after = math.max(Affinity.MIN, math.min(Affinity.MAX, before + (option.affinity or 0)))
+    local after = math.max(Affinity.MIN, math.min(Affinity.MAX, before + (gain or option.affinity or 0)))
     runState.affinity[demon.id] = after
 
     local statGain = option.stat or 0

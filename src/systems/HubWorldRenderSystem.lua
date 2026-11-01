@@ -42,7 +42,7 @@ function HubWorldRenderSystem.draw(scene)
         local pos = world:getComponent(entity, "position")
         local sprite = world:getComponent(entity, "demonSprite")
         local demon = demons[sprite.demonId]
-        local talking = dialogue and demons[dialogue.demonIndex].id == demon.id
+        local talking = dialogue and dialogue.demonId == demon.id
 
         DemonArt.draw(demon, pos.x, pos.y, 48, 96, talking and 1 or 0.4)
     end
