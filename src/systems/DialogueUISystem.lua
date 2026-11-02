@@ -25,12 +25,14 @@ local fonts = {}
 -- Layout: una sola fuente de verdad para update (clics) y render.
 local BOX = { x = 20, y = 356, w = Screen.w - 40, h = 164 }
 local TAG = { x = 20, y = 324, w = 330, h = 30 }
+local MOODTAG = { x = 360, y = 318, w = 580, h = 36 }
 local PORTRAIT = { x = 34, y = 370, w = 136, h = 136 }
 local TEXT_X = 186
 local TEXT_W = BOX.x + BOX.w - TEXT_X - 16
 local OPTIONS_Y = 432
 local OPTION_H = 26
 local TYPE_SPEED = 45 -- letras por segundo
+
 
 -- ---------------------------------------------------------------- helpers
 
@@ -56,12 +58,15 @@ local function openLine(dialogue, runState)
     end
     dialogue.visible = 0
     dialogue.cursor = 1
-    dialogue.picked = nil
+end
+
+local function currentConversation(dialogue, runState)
+    local demon = currentDemon(dialogue)
+    return demon.conversations[runState.talks[demon.id]]
 end
 
 local function currentOptions(dialogue, runState)
-    local demon = currentDemon(dialogue)
-    local conversation = demon.conversations[runState.talks[demon.id]]
+    local conversation = currentConversation(dialogue, runState)
     return conversation and conversation.options
 end
 
@@ -93,7 +98,6 @@ local function choose(scene, dialogue, runState, i)
     dialogue.stage = "reaction"
     dialogue.text = option.reaction
     dialogue.visible = 0
-    dialogue.picked = { affinity = option.affinity or 0, stat = option.stat or 0, statName = demon.stat }
 end
 
 -- "Enter": completa el texto si se está escribiendo, si no avanza.
@@ -202,6 +206,17 @@ local function visibleText(dialogue)
     return text:sub(1, cut)
 end
 
+local function reactionWords(picked, name)
+    if picked.crit then return "¡" .. name .. " quedó fascinado!" end
+    local a = picked.affinity
+    if a >= 5 then return "A " .. name .. " le encantó" end
+    if a >= 3 then return "A " .. name .. " le gustó mucho" end
+    if a >= 1 then return "A " .. name .. " le gustó" end
+    if a == 0 then return "A " .. name .. " le dio igual" end
+    if a >= -2 then return "A " .. name .. " le molestó" end
+    return "Ofendiste a " .. name
+end
+
 local function describePick(picked)
     local parts = {}
     if picked.affinity ~= 0 then
@@ -210,7 +225,7 @@ local function describePick(picked)
     if picked.stat > 0 then
         parts[#parts + 1] = ("+%d %s"):format(picked.stat, picked.statName)
     end
-    if #parts == 0 then return "sin cambios" end
+    if #parts == 0 then return "nada cambió" end
     return table.concat(parts, "   ")
 end
 
@@ -231,10 +246,21 @@ function DialogueUISystem.draw(scene)
     love.graphics.setFont(fonts.name)
     love.graphics.print(demon.name .. " - " .. demon.title, TAG.x + 10, TAG.y + 6)
 
+    local mood = Mood.of(runState.moods[demon.id])
+    love.graphics.setColor(0.07, 0.03, 0.06, 1)
+    love.graphics.rectangle("fill", MOODTAG.x, MOODTAG.y, MOODTAG.w, MOODTAG.h)
+    love.graphics.setColor(mood.color[1], mood.color[2], mood.color[3], 1)
+    love.graphics.rectangle("line", MOODTAG.x, MOODTAG.y, MOODTAG.w, MOODTAG.h)
+
     love.graphics.setFont(fonts.small)
-    love.graphics.setColor(0.8, 0.8, 0.8, 1)
-    love.graphics.printf(Mood.of(runState.moods[demon.id]).name,
-        TAG.x, TAG.y + 10, BOX.w, "right")
+    love.graphics.setColor(0.6, 0.6, 0.6, 1)
+    love.graphics.print("SU HUMOR HOY", MOODTAG.x + 10, MOODTAG.y + 4)
+    love.graphics.setFont(fonts.name)
+    love.graphics.setColor(mood.color[1], mood.color[2], mood.color[3], 1)
+    love.graphics.print(mood.name, MOODTAG.x + 10, MOODTAG.y + 17)
+    love.graphics.setFont(fonts.small)
+    love.graphics.setColor(0.75, 0.72, 0.72, 1)
+    love.graphics.printf(mood.hint, MOODTAG.x, MOODTAG.y + 19, MOODTAG.w - 12, "right")
 
     -- la caja
     love.graphics.setColor(0.07, 0.03, 0.06, 1)
@@ -269,8 +295,14 @@ function DialogueUISystem.draw(scene)
             love.graphics.print(("%d. %s"):format(i, option.text), x, y + 4)
         end
     elseif dialogue.stage == "reaction" then
-        local picked = dialogue.picked
-        if picked.affinity > 0 then
+        local picked = world:resource("lastReaction")
+        if not picked then
+            love.graphics.setColor(1, 1, 1, 1)
+            return
+        end
+        if picked.crit then
+            love.graphics.setColor(1, 0.85, 0.3, 1)
+        elseif picked.affinity > 0 then
             love.graphics.setColor(0.5, 1, 0.5, 1)
         elseif picked.affinity < 0 then
             love.graphics.setColor(1, 0.45, 0.4, 1)
@@ -278,7 +310,11 @@ function DialogueUISystem.draw(scene)
             love.graphics.setColor(0.85, 0.8, 0.8, 1)
         end
         love.graphics.setFont(fonts.option)
-        love.graphics.print(describePick(picked), TEXT_X, OPTIONS_Y + 10)
+        love.graphics.print(reactionWords(picked, demon.name), TEXT_X, OPTIONS_Y + 2)
+
+        love.graphics.setFont(fonts.small)
+        love.graphics.setColor(0.55, 0.55, 0.55, 1)
+        love.graphics.print(describePick(picked), TEXT_X, OPTIONS_Y + 28)
     end
 
     if dialogue.stage ~= "line" then

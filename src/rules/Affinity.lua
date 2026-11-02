@@ -4,6 +4,18 @@ Affinity.MIN = -10
 Affinity.MAX = 10
 Affinity.THRESHOLDS = { 3, 6, 9 } -- umbral i -> carta i del demonio
 
+-- Entrega la próxima carta que le queda al demonio, sin mirar umbrales.
+function Affinity.grant(runState, demon)
+    local given = runState.rewards[demon.id] or 0
+    local card = demon.cards[given + 1]
+    if not card then return nil end
+
+    runState.rewards[demon.id] = given + 1
+    local copy = { name = card.name, stat = card.stat, power = card.power, from = demon.id }
+    runState.cards[#runState.cards + 1] = copy
+    return copy
+end
+
 -- Aplica una respuesta.
 function Affinity.apply(runState, demon, option, gain)
     local before = runState.affinity[demon.id] or 0
@@ -17,16 +29,12 @@ function Affinity.apply(runState, demon, option, gain)
 
     local gained = {}
     local given = runState.rewards[demon.id] or 0
-    while given < #Affinity.THRESHOLDS
-        and after >= Affinity.THRESHOLDS[given + 1]
-        and demon.cards[given + 1] do
-        given = given + 1
-        local card = demon.cards[given]
-        local copy = { name = card.name, stat = card.stat, power = card.power, from = demon.id }
-        runState.cards[#runState.cards + 1] = copy
+    while given < #Affinity.THRESHOLDS and after >= Affinity.THRESHOLDS[given + 1] do
+        local copy = Affinity.grant(runState, demon)
+        if not copy then break end
         gained[#gained + 1] = copy
+        given = runState.rewards[demon.id]
     end
-    runState.rewards[demon.id] = given
 
     return { affinity = after, delta = after - before, stat = statGain, cards = gained }
 end

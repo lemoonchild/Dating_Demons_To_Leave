@@ -20,6 +20,7 @@ local demons = {
         },
         conversations = {
             {
+                demand = 1,
                 line = "¿Otro demonio buscando la salida? Todos preguntan por la puerta. Nadie pregunta por el archivo.",
                 options = {
                     { text = "¿Qué guardas en el archivo?", affinity = 2, stat = 1,
@@ -31,6 +32,7 @@ local demons = {
                 },
             },
             {
+                demand = 2,
                 line = "El guardián de la primera puerta responde acertijos con acertijos. ¿Sabes por qué?",
                 options = {
                     { text = "Porque teme una respuesta directa.", affinity = 2, stat = 1,
@@ -42,6 +44,7 @@ local demons = {
                 },
             },
             {
+                demand = 3,
                 line = "Si te doy lo que sé, ¿qué me darás tú cuando salgas?",
                 options = {
                     { text = "Te escribiré. Desde arriba.", affinity = 2, stat = 1,
@@ -67,6 +70,7 @@ local demons = {
         },
         conversations = {
             {
+                demand = 1,
                 line = "Cariño, nadie entra a mi salón sin un cumplido. Sorpréndeme.",
                 options = {
                     { text = "Tus cuernos brillan más que el lago de fuego.", affinity = 2, stat = 1,
@@ -78,6 +82,7 @@ local demons = {
                 },
             },
             {
+                demand = 2,
                 line = "Los guardianes son solitarios. Un poco de encanto abre más puertas que una llave.",
                 options = {
                     { text = "Enséñame a abrirlas.", affinity = 2, stat = 1,
@@ -89,6 +94,7 @@ local demons = {
                 },
             },
             {
+                demand = 3,
                 line = "Si sales de aquí... ¿te acordarás de mí?",
                 options = {
                     { text = "Eres imposible de olvidar.", affinity = 2, stat = 1,
@@ -114,6 +120,7 @@ local demons = {
         },
         conversations = {
             {
+                demand = 1,
                 line = "¡Eh, tú! ¿Vas a quedarte mirando o vas a sostener el yunque?",
                 options = {
                     { text = "Pásamelo.", affinity = 2, stat = 1,
@@ -125,6 +132,7 @@ local demons = {
                 },
             },
             {
+                demand = 2,
                 line = "Los guardianes solo respetan una cosa: que no te tiemblen las piernas.",
                 options = {
                     { text = "Entréname.", affinity = 2, stat = 1,
@@ -136,6 +144,7 @@ local demons = {
                 },
             },
             {
+                demand = 3,
                 line = "Forjé la cerradura de la puerta del segundo círculo. ¿Quieres saber su debilidad?",
                 options = {
                     { text = "Solo si me la enseñas golpe a golpe.", affinity = 2, stat = 1,
