@@ -9,7 +9,7 @@ local demons = require("src.data.demons")
 local Run = require("src.state.Run")
 local Affinity = require("src.rules.Affinity")
 
-local HudUISystem = { name = "hudUI" }
+local HudRenderSystem = { name = "hudRender" }
 
 local fonts = {}
 
@@ -21,7 +21,7 @@ local BAR_W, BAR_H = 140, 10
 local TOAST_TIME = 3
 local FILL_SPEED = 6 
 
-function HudUISystem.setup(scene)
+function HudRenderSystem.setup(scene)
     fonts.title = love.graphics.newFont(15)
     fonts.text = love.graphics.newFont(13)
     fonts.toast = love.graphics.newFont(16)
@@ -44,7 +44,7 @@ function HudUISystem.setup(scene)
     })
 end
 
-function HudUISystem.unload(scene)
+function HudRenderSystem.unload(scene)
     fonts = {}
 end
 
@@ -54,7 +54,7 @@ local function approach(current, target, dt)
     return next
 end
 
-function HudUISystem.update(scene, dt)
+function HudRenderSystem.update(scene, dt)
     local world = scene.world
     local runState = world:resource("runState")
     local _, hud = world:first("hud")
@@ -184,7 +184,7 @@ local function drawToast(hud)
     love.graphics.printf(text, x, y + 8, w, "center")
 end
 
-function HudUISystem.draw(scene)
+function HudRenderSystem.draw(scene)
     local world = scene.world
     local runState = world:resource("runState")
     local _, hud = world:first("hud")
@@ -200,4 +200,4 @@ function HudUISystem.draw(scene)
     love.graphics.setColor(1, 1, 1, 1)
 end
 
-return HudUISystem
+return HudRenderSystem

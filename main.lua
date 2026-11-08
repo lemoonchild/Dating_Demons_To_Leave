@@ -12,6 +12,8 @@ local Game = require("src.Game")
 function love.load(args)
     Game.registerScene("menu", require("src.scenes.MenuScene"))
     Game.registerScene("week", require("src.scenes.WeekScene"))
+    Game.registerScene("pack", require("src.scenes.PackScene"))
+    Game.registerScene("collection", require("src.scenes.CollectionScene"))
 
     local start = "menu"
     if args[1] and Game.hasScene(args[1]) then

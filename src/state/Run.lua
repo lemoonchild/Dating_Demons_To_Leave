@@ -3,6 +3,7 @@ local demons = require("src.data.demons")
 local Run = {}
 
 Run.DAYS = 7
+Run.ACTIONS = 2
 
 local current = nil
 
@@ -12,6 +13,7 @@ function Run.new(seed)
         seed = seed or os.time(),
         stats = { astucia = 1, encanto = 1, furia = 1 },
         cards = {},
+        pendingPack = {},
         affinity = {},
         rewards = {},
         talks = {},
@@ -23,7 +25,7 @@ function Run.new(seed)
     for _, demon in ipairs(demons) do
         state.affinity[demon.id] = 0
         state.rewards[demon.id] = 0
-        state.talks[demon.id] = 1
+        state.talks[demon.id] = {}
         state.moods[demon.id] = "neutral"
         state.help[demon.id] = false
     end

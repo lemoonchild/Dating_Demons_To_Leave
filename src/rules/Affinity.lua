@@ -1,8 +1,8 @@
 local Affinity = {}
 
-Affinity.MIN = -10
-Affinity.MAX = 10
-Affinity.THRESHOLDS = { 3, 6, 9 } -- umbral i -> carta i del demonio
+Affinity.MIN = -20
+Affinity.MAX = 20
+Affinity.THRESHOLDS = { 7, 13, 20 } -- umbral i -> carta i del demonio
 
 -- Entrega la próxima carta que le queda al demonio, sin mirar umbrales.
 function Affinity.grant(runState, demon)
@@ -11,7 +11,10 @@ function Affinity.grant(runState, demon)
     if not card then return nil end
 
     runState.rewards[demon.id] = given + 1
-    local copy = { name = card.name, stat = card.stat, power = card.power, from = demon.id }
+    local copy = {
+        name = card.name, stat = card.stat, power = card.power,
+        rarity = card.rarity, effect = card.effect, from = demon.id,
+    }
     runState.cards[#runState.cards + 1] = copy
     return copy
 end

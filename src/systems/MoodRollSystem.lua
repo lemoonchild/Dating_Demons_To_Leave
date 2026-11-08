@@ -11,10 +11,4 @@ function MoodRollSystem.setup(scene)
     roll(scene)
 end
 
-function MoodRollSystem.update(scene, dt)
-    if #scene.world:query("dayStarted") > 0 then
-        roll(scene)
-    end
-end
-
 return MoodRollSystem

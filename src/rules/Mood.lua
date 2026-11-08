@@ -3,8 +3,8 @@ local moods = require("src.data.moods")
 local Mood = {}
 
 Mood.DEFAULT = "neutral"
-Mood.LIKES = 6
-Mood.HATES = -3
+Mood.LIKES = 12
+Mood.HATES = -6
 
 local function shuffle(bag, random)
     for i = #bag, 2, -1 do

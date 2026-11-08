@@ -1,4 +1,4 @@
-local Run = require("src.state.Run")
+local PackGen = require("src.rules.PackGen")
 
 local DayCloseSystem = { name = "dayClose" }
 
@@ -8,26 +8,18 @@ function DayCloseSystem.update(scene, dt)
     if phase.phase ~= "closing" then return end
 
     local runState = world:resource("runState")
-    runState.log[#runState.log + 1] = {
-        day = runState.day,
-        kind = phase.kind,
-        demonId = phase.demonId,
-        stat = phase.stat,
-        mood = phase.demonId and runState.moods[phase.demonId],
-    }
-
-    if runState.day >= Run.DAYS then
-        phase.phase = "over"
-        world:spawn({ switchRequest = { to = "menu" } })
-        return
+    local entries = {}
+    for _, entry in ipairs(runState.log) do
+        if entry.day == runState.day then
+            entries[#entries + 1] = entry
+        end
     end
 
+    runState.pendingPack = PackGen.forDay(runState, entries, love.math.random)
     runState.day = runState.day + 1
-    phase.phase = "choosing"
-    phase.kind = nil
-    phase.demonId = nil
-    phase.stat = nil
-    world:spawn({ event = true, dayStarted = { day = runState.day } })
+
+    phase.phase = "over"
+    world:spawn({ switchRequest = { to = "pack" } })
 end
 
 return DayCloseSystem
