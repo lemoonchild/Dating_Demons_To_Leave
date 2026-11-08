@@ -56,9 +56,6 @@ local function describePick(picked)
     if picked.affinity ~= 0 then
         parts[#parts + 1] = ("%+d afinidad"):format(picked.affinity)
     end
-    if picked.stat > 0 then
-        parts[#parts + 1] = ("+%d %s"):format(picked.stat, picked.statName)
-    end
     if #parts == 0 then return "nada cambió" end
     return table.concat(parts, "   ")
 end

@@ -25,11 +25,6 @@ function Affinity.apply(runState, demon, option, gain)
     local after = math.max(Affinity.MIN, math.min(Affinity.MAX, before + (gain or option.affinity or 0)))
     runState.affinity[demon.id] = after
 
-    local statGain = option.stat or 0
-    if statGain > 0 then
-        runState.stats[demon.stat] = (runState.stats[demon.stat] or 0) + statGain
-    end
-
     local gained = {}
     local given = runState.rewards[demon.id] or 0
     while given < #Affinity.THRESHOLDS and after >= Affinity.THRESHOLDS[given + 1] do
@@ -39,7 +34,7 @@ function Affinity.apply(runState, demon, option, gain)
         given = runState.rewards[demon.id]
     end
 
-    return { affinity = after, delta = after - before, stat = statGain, cards = gained }
+    return { affinity = after, delta = after - before, cards = gained }
 end
 
 -- negativo = el demonio detesta al jugador, positivo = le agrada.

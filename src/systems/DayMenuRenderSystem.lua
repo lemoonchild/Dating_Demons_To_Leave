@@ -2,6 +2,7 @@ local Run = require("src.state.Run")
 local demons = require("src.data.demons")
 local stats = require("src.data.stats")
 local Mood = require("src.rules.Mood")
+local TrainingSystem = require("src.systems.TrainingSystem")
 local DayMenuLayout = require("src.ui.DayMenuLayout")
 local DayMenuInputSystem = require("src.systems.DayMenuInputSystem")
 
@@ -69,7 +70,7 @@ function DayMenuRenderSystem.draw(scene)
             love.graphics.printf(mood.name, x, y + 7, w - 16, "right")
         else
             love.graphics.setColor(0.6, 0.6, 0.6, 1)
-            love.graphics.printf("+1, te toma el día", x, y + 7, w - 16, "right")
+            love.graphics.printf(("+%d, te toma el día"):format(TrainingSystem.GAIN), x, y + 7, w - 16, "right")
         end
     end
 

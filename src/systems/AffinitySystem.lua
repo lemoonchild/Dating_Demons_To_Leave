@@ -41,8 +41,6 @@ function AffinitySystem.update(scene, dt)
         world:setResource("lastReaction", {
             demonId = demon.id,
             affinity = result.delta,
-            stat = result.stat,
-            statName = demon.stat,
             roll = rolled.roll,
             spread = rolled.spread,
             crit = rolled.crit,

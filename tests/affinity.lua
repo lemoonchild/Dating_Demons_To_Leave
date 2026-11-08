@@ -21,13 +21,13 @@ local function newRun()
 end
 
 local T = Affinity.THRESHOLDS
-local good = { affinity = 2, stat = 1 }
-local bad = { affinity = -1, stat = 0 }
+local good = { affinity = 2 }
+local bad = { affinity = -1 }
 
 local run = newRun()
 local r = Affinity.apply(run, demon, good)
 assert(run.affinity.test == 2 and r.delta == 2, "la afinidad no subió")
-assert(run.stats.astucia == 2 and r.stat == 1, "la stat no subió")
+assert(run.stats.astucia == 1, "hablar movió una stat: las stats solo salen de entrenar")
 assert(#r.cards == 0, "regaló carta antes del primer umbral")
 
 r = Affinity.apply(run, demon, good, T[1] - 2)
@@ -45,6 +45,9 @@ local low = newRun()
 local r2 = Affinity.apply(low, demon, bad)
 assert(low.affinity.test == -1 and r2.delta == -1, "la afinidad no bajó de 0")
 assert(low.stats.astucia == 1, "una mala respuesta cambió la stat")
+
+for _ = 1, 10 do Affinity.apply(run, demon, good) end
+assert(run.stats.astucia == 1, "diez respuestas buenas movieron una stat")
 
 for _ = 1, 40 do Affinity.apply(low, demon, bad) end
 assert(low.affinity.test == Affinity.MIN, "la afinidad pasó el mínimo")

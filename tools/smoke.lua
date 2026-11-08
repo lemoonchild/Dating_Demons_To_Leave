@@ -6,6 +6,7 @@ stub.install()
 local Game = require("src.Game")
 local Run = require("src.state.Run")
 local PackGen = require("src.rules.PackGen")
+local TrainingSystem = require("src.systems.TrainingSystem")
 
 Game.registerScene("menu", require("src.scenes.MenuScene"))
 Game.registerScene("week", require("src.scenes.WeekScene"))
@@ -41,8 +42,10 @@ local run = Run.current()
 local phase = Game.current().world:resource("dayPhase")
 assert(phase.left == Run.ACTIONS, "el día no arrancó con " .. Run.ACTIONS .. " acciones")
 
+local statsBeforeTalking = run.stats.astucia
 talkTo(1)
 assert(scene() == "week", "el día cerró con una sola acción")
+assert(run.stats.astucia == statsBeforeTalking, "hablar subió una stat: eso ahora solo lo hace entrenar")
 assert(Game.current().world:resource("dayPhase").left == Run.ACTIONS - 1, "no se descontó la acción")
 local used = 0
 for _ in pairs(run.talks.azazel) do used = used + 1 end
@@ -93,7 +96,8 @@ while run.day <= Run.DAYS do
     leavePack()
 end
 
-assert(run.stats.furia == furiaBefore + trainingDays, "entrenar no subió la stat una vez por día")
+assert(run.stats.furia == furiaBefore + trainingDays * TrainingSystem.GAIN,
+    "entrenar no subió la stat " .. TrainingSystem.GAIN .. " por día, quedó en " .. run.stats.furia)
 assert(#run.cards == cardsBeforeTraining, "entrenar dio cartas")
 assert(run.day == Run.DAYS + 1, "la semana no terminó")
 assert(scene() == "menu", "después del día 7 no se salió de la semana")
