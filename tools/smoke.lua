@@ -51,6 +51,18 @@ local used = 0
 for _ in pairs(run.talks.azazel) do used = used + 1 end
 assert(used == 1, "hablar no marcó la conversación como usada")
 
+local moodsBefore = {}
+for id, mood in pairs(run.moods) do moodsBefore[id] = mood end
+press("c", 2)
+assert(scene() == "collection", "C no abrió la colección a mitad del día")
+press("escape", 2)
+assert(scene() == "week", "salir de la colección no volvió a la semana a mitad del día")
+assert(Game.current().world:resource("dayPhase").left == Run.ACTIONS - 1,
+    "volver a la semana a mitad del día devolvió las acciones")
+for id, mood in pairs(moodsBefore) do
+    assert(run.moods[id] == mood, "volver a la semana a mitad del día cambió el humor de " .. id)
+end
+
 talkTo(2)
 assert(scene() == "pack", "gastar las dos acciones no abrió el paquete, estoy en " .. scene())
 assert(run.day == 2, "el día no avanzó")

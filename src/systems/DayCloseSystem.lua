@@ -1,3 +1,4 @@
+local Run = require("src.state.Run")
 local PackGen = require("src.rules.PackGen")
 
 local DayCloseSystem = { name = "dayClose" }
@@ -17,6 +18,7 @@ function DayCloseSystem.update(scene, dt)
 
     runState.pendingPack = PackGen.forDay(runState, entries, love.math.random)
     runState.day = runState.day + 1
+    runState.actionsLeft = Run.ACTIONS
 
     phase.phase = "over"
     world:spawn({ switchRequest = { to = "pack" } })

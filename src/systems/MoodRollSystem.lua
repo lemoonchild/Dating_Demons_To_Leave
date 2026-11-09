@@ -4,7 +4,10 @@ local Mood = require("src.rules.Mood")
 local MoodRollSystem = { name = "moodRoll" }
 
 local function roll(scene)
-    Mood.roll(scene.world:resource("runState"), demons, love.math.random)
+    local runState = scene.world:resource("runState")
+    if runState.moodDay == runState.day then return end
+    Mood.roll(runState, demons, love.math.random)
+    runState.moodDay = runState.day
 end
 
 function MoodRollSystem.setup(scene)

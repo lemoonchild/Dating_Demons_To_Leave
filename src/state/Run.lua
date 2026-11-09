@@ -10,6 +10,8 @@ local current = nil
 function Run.new(seed)
     local state = {
         day = 1,
+        actionsLeft = Run.ACTIONS,
+        moodDay = 0,
         seed = seed or os.time(),
         stats = { astucia = 1, encanto = 1, furia = 1 },
         cards = {},

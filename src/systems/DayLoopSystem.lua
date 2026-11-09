@@ -1,9 +1,8 @@
-local Run = require("src.state.Run")
-
 local DayLoopSystem = { name = "dayLoop" }
 
 function DayLoopSystem.setup(scene)
-    scene.world:setResource("dayPhase", { phase = "choosing", left = Run.ACTIONS })
+    local runState = scene.world:resource("runState")
+    scene.world:setResource("dayPhase", { phase = "choosing", left = runState.actionsLeft })
 end
 
 function DayLoopSystem.update(scene, dt)
@@ -29,6 +28,7 @@ function DayLoopSystem.update(scene, dt)
             mood = phase.demonId and runState.moods[phase.demonId],
         }
         phase.left = kind == "train" and 0 or phase.left - 1
+        runState.actionsLeft = phase.left
         phase.kind, phase.demonId, phase.stat = nil, nil, nil
         phase.phase = phase.left > 0 and "choosing" or "closing"
     end
