@@ -6,9 +6,12 @@ local map = require("src.data.map")
 local MapInputSystem = require("src.systems.MapInputSystem")
 local MovementSystem = require("src.systems.MovementSystem")
 local TileCollisionSystem = require("src.systems.TileCollisionSystem")
+local PlaceProximitySystem = require("src.systems.PlaceProximitySystem")
+local PlaceEnterSystem = require("src.systems.PlaceEnterSystem")
 local MapRenderSystem = require("src.systems.MapRenderSystem")
 local PlaceRenderSystem = require("src.systems.PlaceRenderSystem")
 local PlayerRenderSystem = require("src.systems.PlayerRenderSystem")
+local MapHudRenderSystem = require("src.systems.MapHudRenderSystem")
 
 local function cellRect(x, y, w, h)
     return { x = (x - 1) * map.cell, y = (y - 1) * map.cell, w = w * map.cell, h = h * map.cell }
@@ -44,9 +47,12 @@ return function(payload)
     scene:addSystem(MapInputSystem)
     scene:addSystem(MovementSystem)
     scene:addSystem(TileCollisionSystem)
+    scene:addSystem(PlaceProximitySystem)
+    scene:addSystem(PlaceEnterSystem)
     scene:addSystem(MapRenderSystem)
     scene:addSystem(PlaceRenderSystem)
     scene:addSystem(PlayerRenderSystem)
+    scene:addSystem(MapHudRenderSystem)
 
     return scene
 end

@@ -25,7 +25,7 @@ local function doorRect(building, area)
     return x, building.y, w, 18
 end
 
-function PlaceArt.draw(place, building, area, font)
+function PlaceArt.draw(place, building, area, font, focused)
     local color = colorOf(place)
     love.graphics.setColor(color[1], color[2], color[3], 1)
     love.graphics.rectangle("fill", building.x, building.y, building.w, building.h)
@@ -42,6 +42,13 @@ function PlaceArt.draw(place, building, area, font)
     love.graphics.rectangle("fill", dx, dy, dw, dh)
     love.graphics.setColor(0.8, 0.3, 0.15, 1)
     love.graphics.rectangle("line", dx, dy, dw, dh)
+
+    if focused then
+        love.graphics.setColor(1, 0.85, 0.3, 1)
+        love.graphics.rectangle("line", area.x + 1, area.y + 1, area.w - 2, area.h - 2)
+        love.graphics.rectangle("line", area.x + 3, area.y + 3, area.w - 6, area.h - 6)
+        love.graphics.rectangle("line", dx - 2, dy - 2, dw + 4, dh + 4)
+    end
 
     if place.kind == "demon" then
         local doorCenter = area.x + area.w / 2

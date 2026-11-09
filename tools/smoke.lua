@@ -171,4 +171,39 @@ stub.release()
 local moved = math.sqrt((player().x - 42) ^ 2 + (player().y - 298) ^ 2)
 assert(close(moved, 80), ("la diagonal no camina a la misma velocidad: %.2f px"):format(moved))
 
+local map = require("src.data.map")
+local function focus() return Game.current().world:resource("mapFocus").placeId end
+local function standAt(id)
+    local door = map.places[id].door
+    local pos = player()
+    pos.x, pos.y = (door.x - 0.5) * map.cell, (door.y - 0.5) * map.cell
+    stub.clear()
+    tick(1)
+end
+
+assert(focus() == nil, "lejos de las puertas igual hay un lugar enfocado")
+standAt("salon")
+assert(focus() == "salon", "pararse en la puerta del Salón Carmesí no lo enfocó")
+assert(stub.find("Lilim"), "el cartel del Salón Carmesí no nombra a Lilim")
+press("return", 1)
+assert(scene() == "map", "Enter en una casa sacó del mapa antes de tiempo")
+standAt("puerta")
+assert(stub.find("Todavía no"), "la Puerta del Guardián no avisa que está cerrada")
+press("return", 1)
+assert(scene() == "map", "la Puerta del Guardián dejó pasar")
+
+standAt("celda")
+assert(focus() == "celda", "la puerta de tu celda no se enfocó")
+press("return", 2)
+assert(scene() == "week", "Enter en tu celda no volvió")
+
+Game.start("map")
+tick(1)
+press("escape", 2)
+assert(scene() == "week", "Esc en el mapa no volvió")
+
+Game.start("map", { from = "calderas" })
+tick(1)
+assert(focus() == "calderas", "volver desde las Calderas no dejó al jugador en su puerta")
+
 print(("smoke ok -- semana completa, %d cartas, estado compartido plano"):format(#run.cards))
