@@ -3,6 +3,9 @@ local Run = require("src.state.Run")
 local TileGrid = require("src.world.TileGrid")
 local map = require("src.data.map")
 
+local MapInputSystem = require("src.systems.MapInputSystem")
+local MovementSystem = require("src.systems.MovementSystem")
+local TileCollisionSystem = require("src.systems.TileCollisionSystem")
 local MapRenderSystem = require("src.systems.MapRenderSystem")
 local PlaceRenderSystem = require("src.systems.PlaceRenderSystem")
 local PlayerRenderSystem = require("src.systems.PlayerRenderSystem")
@@ -33,8 +36,14 @@ return function(payload)
         player = true,
         position = { x = (start.x - 0.5) * map.cell, y = (start.y - 0.5) * map.cell },
         body = { w = 20, h = 20 },
+        moveIntent = { dx = 0, dy = 0 },
+        velocity = { x = 0, y = 0 },
+        walker = { speed = 160 },
     })
 
+    scene:addSystem(MapInputSystem)
+    scene:addSystem(MovementSystem)
+    scene:addSystem(TileCollisionSystem)
     scene:addSystem(MapRenderSystem)
     scene:addSystem(PlaceRenderSystem)
     scene:addSystem(PlayerRenderSystem)

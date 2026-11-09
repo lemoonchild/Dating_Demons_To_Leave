@@ -142,4 +142,33 @@ for _, name in ipairs({ "Tu celda", "Archivo del Limbo", "Salón Carmesí", "Cal
     assert(stub.find(name), "el mapa no dibujó " .. name)
 end
 
+local function player()
+    local world = Game.current().world
+    return world:getComponent(world:query("player", "position")[1], "position")
+end
+local function hold(key, n)
+    stub.hold(key) tick(n) stub.release()
+end
+local function close(a, b) return math.abs(a - b) < 0.01 end
+
+local start = player()
+local startX, startY = start.x, start.y
+hold("right", 30)
+assert(close(player().x, startX + 80) and close(player().y, startY),
+    ("caminar medio segundo a la derecha no avanzó 80 px: %.2f"):format(player().x - startX))
+hold("left", 30)
+assert(close(player().x, startX), "volver a la izquierda no regresó al mismo lugar")
+
+hold("w", 120)
+assert(close(player().y, 298) and close(player().x, startX),
+    ("la lava no detuvo al jugador: %.2f, %.2f"):format(player().x, player().y))
+hold("a", 120)
+assert(close(player().x, 42), ("el muro izquierdo no detuvo al jugador: %.2f"):format(player().x))
+
+stub.hold("right") stub.hold("down")
+tick(30)
+stub.release()
+local moved = math.sqrt((player().x - 42) ^ 2 + (player().y - 298) ^ 2)
+assert(close(moved, 80), ("la diagonal no camina a la misma velocidad: %.2f px"):format(moved))
+
 print(("smoke ok -- semana completa, %d cartas, estado compartido plano"):format(#run.cards))

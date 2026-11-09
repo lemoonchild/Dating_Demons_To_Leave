@@ -1,4 +1,4 @@
-local stub = { drawn = {} }
+local stub = { drawn = {}, held = {} }
 
 local font = {}
 function font:getHeight() return 14 end
@@ -21,12 +21,27 @@ function stub.install()
             captureScreenshot = function() end,
         },
         mouse = { getPosition = function() return 0, 0 end, isDown = function() return false end },
-        keyboard = { isDown = function() return false end },
+        keyboard = {
+            isDown = function(...)
+                for _, key in ipairs({ ... }) do
+                    if stub.held[key] then return true end
+                end
+                return false
+            end,
+        },
         event = { quit = function() end },
         math = { random = function(n) return math.random(n) end },
         filesystem = { getSaveDirectory = function() return "/tmp" end },
     }
     return love
+end
+
+function stub.hold(key)
+    stub.held[key] = true
+end
+
+function stub.release()
+    stub.held = {}
 end
 
 function stub.clear()
