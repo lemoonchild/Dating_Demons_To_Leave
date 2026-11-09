@@ -12,6 +12,7 @@ Game.registerScene("menu", require("src.scenes.MenuScene"))
 Game.registerScene("week", require("src.scenes.WeekScene"))
 Game.registerScene("pack", require("src.scenes.PackScene"))
 Game.registerScene("collection", require("src.scenes.CollectionScene"))
+Game.registerScene("map", require("src.scenes.MapScene"))
 
 local function tick(n) for _ = 1, (n or 1) do Game.update(1 / 60); Game.draw() end end
 local function press(k, n) Game.keypressed(k); tick(n or 1) end
@@ -132,5 +133,13 @@ local function scan(value, path, depth)
 end
 scan(run, "runState", 0)
 assert(#flat == 0, "el estado compartido guarda algo que no es un dato simple: " .. table.concat(flat, ", "))
+
+Game.start("map")
+stub.clear()
+tick(2)
+assert(scene() == "map", "no se pudo abrir el mapa")
+for _, name in ipairs({ "Tu celda", "Archivo del Limbo", "Salón Carmesí", "Calderas", "Puerta del Guardián" }) do
+    assert(stub.find(name), "el mapa no dibujó " .. name)
+end
 
 print(("smoke ok -- semana completa, %d cartas, estado compartido plano"):format(#run.cards))
