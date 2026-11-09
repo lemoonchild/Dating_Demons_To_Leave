@@ -2,7 +2,7 @@ local map = require("src.data.map")
 
 local PlaceEnterSystem = { name = "placeEnter" }
 
-PlaceEnterSystem.HOME = "week"
+PlaceEnterSystem.HOME = "room"
 
 function PlaceEnterSystem.update(scene, dt)
     local world = scene.world

@@ -9,7 +9,7 @@ return function(payload)
     scene.world:setResource("runState", Run.current())
     scene.world:setResource("collectionNav", {
         cursor = 1,
-        back = payload and payload.back or "week",
+        back = payload and payload.back or "room",
     })
     scene:addSystem(CollectionNavSystem)
     scene:addSystem(CollectionRenderSystem)

@@ -3,6 +3,7 @@ local Run = require("src.state.Run")
 local TileGrid = require("src.world.TileGrid")
 local map = require("src.data.map")
 
+local MoodRollSystem = require("src.systems.MoodRollSystem")
 local MapInputSystem = require("src.systems.MapInputSystem")
 local MovementSystem = require("src.systems.MovementSystem")
 local TileCollisionSystem = require("src.systems.TileCollisionSystem")
@@ -44,6 +45,7 @@ return function(payload)
         walker = { speed = 160 },
     })
 
+    scene:addSystem(MoodRollSystem)
     scene:addSystem(MapInputSystem)
     scene:addSystem(MovementSystem)
     scene:addSystem(TileCollisionSystem)

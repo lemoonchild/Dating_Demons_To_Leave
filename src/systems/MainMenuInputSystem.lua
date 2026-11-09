@@ -7,7 +7,7 @@ local function confirm(scene, menu)
     local option = menu.options[menu.cursor].id
     if option == "play" then
         Run.start()
-        scene.world:spawn({ switchRequest = { to = "week" } })
+        scene.world:spawn({ switchRequest = { to = "room" } })
     elseif option == "credits" then
         menu.showCredits = true
     elseif option == "quit" then

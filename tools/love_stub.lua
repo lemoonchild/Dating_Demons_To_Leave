@@ -17,7 +17,7 @@ function stub.install()
             rectangle = function() end, line = function() end,
             setColor = function() end, setFont = function() end,
             push = function() end, pop = function() end,
-            origin = function() end, translate = function() end,
+            origin = function() end, translate = function() end, scale = function() end,
             captureScreenshot = function() end,
         },
         mouse = { getPosition = function() return 0, 0 end, isDown = function() return false end },

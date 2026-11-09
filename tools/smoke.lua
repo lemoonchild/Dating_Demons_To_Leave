@@ -5,11 +5,12 @@ stub.install()
 
 local Game = require("src.Game")
 local Run = require("src.state.Run")
-local PackGen = require("src.rules.PackGen")
 local TrainingSystem = require("src.systems.TrainingSystem")
+local stats = require("src.data.stats")
+local map = require("src.data.map")
 
 Game.registerScene("menu", require("src.scenes.MenuScene"))
-Game.registerScene("week", require("src.scenes.WeekScene"))
+Game.registerScene("room", require("src.scenes.RoomScene"))
 Game.registerScene("pack", require("src.scenes.PackScene"))
 Game.registerScene("collection", require("src.scenes.CollectionScene"))
 Game.registerScene("map", require("src.scenes.MapScene"))
@@ -17,6 +18,8 @@ Game.registerScene("map", require("src.scenes.MapScene"))
 local function tick(n) for _ = 1, (n or 1) do Game.update(1 / 60); Game.draw() end end
 local function press(k, n) Game.keypressed(k); tick(n or 1) end
 local function scene() return Game.current().name end
+local function roomMenu() local _, menu = Game.current().world:first("roomMenu") return menu end
+local function actionsLeft() return Game.current().world:resource("dayPhase").left end
 
 local function leavePack()
     local guard = 0
@@ -27,98 +30,80 @@ local function leavePack()
     assert(guard < 12, "no se pudo salir del paquete")
 end
 
-local function talkTo(n)
-    press(tostring(n)) tick(2)
-    press("return", 3) press("return", 3)
-    press("1", 2)
-    press("return", 3) press("return", 3)
-end
-
 math.randomseed(12)
 Game.start("menu")
 press("return", 2)
-assert(scene() == "week", "Jugar no llevó a la semana")
+assert(scene() == "room", "Jugar no llevó a la celda")
 
 local run = Run.current()
-local phase = Game.current().world:resource("dayPhase")
-assert(phase.left == Run.ACTIONS, "el día no arrancó con " .. Run.ACTIONS .. " acciones")
+assert(actionsLeft() == Run.ACTIONS, "el día no arrancó con " .. Run.ACTIONS .. " acciones")
+assert(roomMenu().screen == "main", "la celda no abrió en el menú principal")
 
-local statsBeforeTalking = run.stats.astucia
-talkTo(1)
-assert(scene() == "week", "el día cerró con una sola acción")
-assert(run.stats.astucia == statsBeforeTalking, "hablar subió una stat: eso ahora solo lo hace entrenar")
-assert(Game.current().world:resource("dayPhase").left == Run.ACTIONS - 1, "no se descontó la acción")
-local used = 0
-for _ in pairs(run.talks.azazel) do used = used + 1 end
-assert(used == 1, "hablar no marcó la conversación como usada")
+press("return", 1)
+assert(roomMenu().screen == "training", "Entrenar no abrió el panel de entrenamiento")
+stub.clear()
+tick(1)
+for _, stat in ipairs(stats) do
+    assert(stub.find(stat.description), "el panel de entrenamiento no explica " .. stat.name)
+end
+press("escape", 1)
+assert(scene() == "room" and roomMenu().screen == "main", "Esc no volvió del panel de entrenamiento")
+press("1", 1)
+press(tostring(#stats + 1), 1)
+assert(roomMenu().screen == "main", "Volver no cerró el panel de entrenamiento")
+assert(actionsLeft() == Run.ACTIONS and #run.log == 0, "mirar el panel de entrenamiento gastó una acción")
 
 local moodsBefore = {}
 for id, mood in pairs(run.moods) do moodsBefore[id] = mood end
-press("c", 2)
-assert(scene() == "collection", "C no abrió la colección a mitad del día")
+press("2", 2)
+assert(scene() == "map", "Visitar demonios no salió al mapa")
+press("return", 2)
+assert(scene() == "room", "Enter en la puerta de tu celda no volvió a la celda")
+press("2", 2)
 press("escape", 2)
-assert(scene() == "week", "salir de la colección no volvió a la semana a mitad del día")
-assert(Game.current().world:resource("dayPhase").left == Run.ACTIONS - 1,
-    "volver a la semana a mitad del día devolvió las acciones")
+assert(scene() == "room", "Esc en el mapa no volvió a la celda")
+assert(actionsLeft() == Run.ACTIONS, "salir al mapa y volver gastó acciones")
 for id, mood in pairs(moodsBefore) do
-    assert(run.moods[id] == mood, "volver a la semana a mitad del día cambió el humor de " .. id)
+    assert(run.moods[id] == mood, "salir al mapa y volver cambió el humor de " .. id)
 end
-
-talkTo(2)
-assert(scene() == "pack", "gastar las dos acciones no abrió el paquete, estoy en " .. scene())
-assert(run.day == 2, "el día no avanzó")
-assert(#run.cards >= PackGen.MIN, "el paquete no llegó a la colección")
-for _, card in ipairs(run.cards) do
-    assert(card.name and card.stat and card.power and card.rarity and card.effect,
-        "una carta de la colección está incompleta")
-end
-assert(#run.pendingPack == 0, "el paquete pendiente no se limpió")
-
-local dayOne = 0
-for _, e in ipairs(run.log) do if e.day == 1 then dayOne = dayOne + 1 end end
-assert(dayOne == Run.ACTIONS, "el día 1 no registró las dos acciones")
-
-press("return") press("c", 2)
-assert(scene() == "collection", "C no abrió la colección desde el paquete")
-local before = #run.cards
-press("right", 2) press("down", 2)
-press("escape", 2)
-assert(scene() == "pack", "salir de la colección no volvió al paquete")
-assert(#run.cards == before, "mirar la colección cambió las cartas")
-
-leavePack()
-assert(scene() == "week", "salir del paquete no volvió a la semana")
 
 press("c", 2)
-assert(scene() == "collection", "C no abrió la colección desde el menú del día")
-assert(#run.cards == before, "la colección perdió cartas al reabrirla")
+assert(scene() == "collection", "C no abrió la colección desde la celda")
 press("escape", 2)
-assert(scene() == "week", "salir de la colección no volvió a la semana")
+assert(scene() == "room", "salir de la colección no volvió a la celda")
 
-local cardsBeforeTraining = #run.cards
 local furiaBefore = run.stats.furia
 local trainingDays = 0
 while run.day <= Run.DAYS do
     local d = run.day
-    press("6", 2)
+    press("1", 1)
+    press("3", 2)
     assert(scene() == "pack", "entrenar no cerró el día " .. d .. ", estoy en " .. scene())
     local dayLog = 0
     for _, e in ipairs(run.log) do if e.day == d then dayLog = dayLog + 1 end end
     assert(dayLog == 1, "el día de entrenamiento registró " .. dayLog .. " acciones, esperaba 1")
     trainingDays = trainingDays + 1
+
+    if d == 1 then
+        press("c", 2)
+        assert(scene() == "collection", "C no abrió la colección desde el paquete")
+        press("escape", 2)
+        assert(scene() == "pack", "salir de la colección no volvió al paquete")
+    end
+
     leavePack()
+    if run.day <= Run.DAYS then
+        assert(scene() == "room", "salir del paquete no volvió a la celda")
+        assert(actionsLeft() == Run.ACTIONS, "el día nuevo no arrancó con todas sus acciones")
+    end
 end
 
 assert(run.stats.furia == furiaBefore + trainingDays * TrainingSystem.GAIN,
     "entrenar no subió la stat " .. TrainingSystem.GAIN .. " por día, quedó en " .. run.stats.furia)
-assert(#run.cards == cardsBeforeTraining, "entrenar dio cartas")
+assert(#run.cards == 0, "entrenar dio cartas")
 assert(run.day == Run.DAYS + 1, "la semana no terminó")
 assert(scene() == "menu", "después del día 7 no se salió de la semana")
-assert(#run.log == Run.ACTIONS + trainingDays, "el log no cuadra con las acciones gastadas")
-
-local kinds = {}
-for _, entry in ipairs(run.log) do kinds[entry.kind] = true end
-assert(kinds.visit and kinds.train, "el log no registró los dos tipos de acción")
+assert(#run.log == trainingDays, "el log no cuadra con las acciones gastadas")
 
 local flat = {}
 local function scan(value, path, depth)
@@ -171,7 +156,6 @@ stub.release()
 local moved = math.sqrt((player().x - 42) ^ 2 + (player().y - 298) ^ 2)
 assert(close(moved, 80), ("la diagonal no camina a la misma velocidad: %.2f px"):format(moved))
 
-local map = require("src.data.map")
 local function focus() return Game.current().world:resource("mapFocus").placeId end
 local function standAt(id)
     local door = map.places[id].door
@@ -195,15 +179,15 @@ assert(scene() == "map", "la Puerta del Guardián dejó pasar")
 standAt("celda")
 assert(focus() == "celda", "la puerta de tu celda no se enfocó")
 press("return", 2)
-assert(scene() == "week", "Enter en tu celda no volvió")
+assert(scene() == "room", "Enter en tu celda no volvió")
 
 Game.start("map")
 tick(1)
 press("escape", 2)
-assert(scene() == "week", "Esc en el mapa no volvió")
+assert(scene() == "room", "Esc en el mapa no volvió")
 
 Game.start("map", { from = "calderas" })
 tick(1)
 assert(focus() == "calderas", "volver desde las Calderas no dejó al jugador en su puerta")
 
-print(("smoke ok -- semana completa, %d cartas, estado compartido plano"):format(#run.cards))
+print(("smoke ok -- semana de entrenamiento completa, mapa recorrido, %d cartas, estado compartido plano"):format(#run.cards))

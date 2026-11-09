@@ -11,7 +11,7 @@ local Game = require("src.Game")
 
 function love.load(args)
     Game.registerScene("menu", require("src.scenes.MenuScene"))
-    Game.registerScene("week", require("src.scenes.WeekScene"))
+    Game.registerScene("room", require("src.scenes.RoomScene"))
     Game.registerScene("pack", require("src.scenes.PackScene"))
     Game.registerScene("collection", require("src.scenes.CollectionScene"))
     Game.registerScene("map", require("src.scenes.MapScene"))

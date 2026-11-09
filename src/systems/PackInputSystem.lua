@@ -24,7 +24,7 @@ function PackInputSystem.update(scene, dt)
     local world = scene.world
     local runState = world:resource("runState")
     local _, reveal = world:first("reveal")
-    local done = runState.day > Run.DAYS and "menu" or "week"
+    local done = runState.day > Run.DAYS and "menu" or "room"
 
     if reveal.shown < #reveal.pack then
         reveal.timer = reveal.timer + dt
