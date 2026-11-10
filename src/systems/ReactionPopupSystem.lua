@@ -3,7 +3,8 @@ local ReactionPopupSystem = { name = "reactionPopup" }
 local fonts = {}
 
 local LIFE = 1.6
-local RISE = 70
+local RISE = 30
+local START = 0.6
 
 function ReactionPopupSystem.setup(scene)
     fonts.popup = love.graphics.newFont(26)
@@ -19,10 +20,11 @@ function ReactionPopupSystem.update(scene, dt)
     for _, entity in ipairs(world:query("reactionApplied")) do
         local applied = world:getComponent(entity, "reactionApplied")
         for _, target in ipairs(world:query("position", "demonSprite")) do
-            if world:getComponent(target, "demonSprite").demonId == applied.demonId then
+            local sprite = world:getComponent(target, "demonSprite")
+            if sprite.demonId == applied.demonId then
                 local pos = world:getComponent(target, "position")
                 world:spawn({
-                    position = { x = pos.x, y = pos.y - 110 },
+                    position = { x = pos.x, y = pos.y - (sprite.h or 96) * START },
                     popup = {
                         text = ("%+d"):format(applied.affinity),
                         life = LIFE,
@@ -59,6 +61,8 @@ function ReactionPopupSystem.draw(scene)
         local pos = world:getComponent(entity, "position")
         local alpha = math.min(1, popup.life / (LIFE * 0.5))
 
+        love.graphics.setColor(0, 0, 0, alpha * 0.8)
+        love.graphics.printf(popup.text, pos.x - 58, pos.y + 2, 120, "center")
         if popup.crit then
             love.graphics.setColor(1, 0.85, 0.3, alpha)
         elseif popup.good then

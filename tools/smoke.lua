@@ -14,12 +14,33 @@ Game.registerScene("room", require("src.scenes.RoomScene"))
 Game.registerScene("pack", require("src.scenes.PackScene"))
 Game.registerScene("collection", require("src.scenes.CollectionScene"))
 Game.registerScene("map", require("src.scenes.MapScene"))
+Game.registerScene("visit", require("src.scenes.VisitScene"))
 
 local function tick(n) for _ = 1, (n or 1) do Game.update(1 / 60); Game.draw() end end
 local function press(k, n) Game.keypressed(k); tick(n or 1) end
 local function scene() return Game.current().name end
 local function roomMenu() local _, menu = Game.current().world:first("roomMenu") return menu end
 local function actionsLeft() return Game.current().world:resource("dayPhase").left end
+local function player()
+    local world = Game.current().world
+    return world:getComponent(world:query("player", "position")[1], "position")
+end
+local function focus() return Game.current().world:resource("mapFocus").placeId end
+local function standAt(id)
+    local door = map.places[id].door
+    local pos = player()
+    pos.x, pos.y = (door.x - 0.5) * map.cell, (door.y - 0.5) * map.cell
+    stub.clear()
+    tick(1)
+end
+local function talk()
+    local guard = 0
+    while scene() == "visit" and guard < 12 do
+        press("return", 3)
+        guard = guard + 1
+    end
+    assert(guard < 12, "la conversación no terminó")
+end
 
 local function leavePack()
     local guard = 0
@@ -72,6 +93,42 @@ assert(scene() == "collection", "C no abrió la colección desde la celda")
 press("escape", 2)
 assert(scene() == "room", "salir de la colección no volvió a la celda")
 
+press("2", 2)
+standAt("archivo")
+assert(stub.find("Presiona Enter para entrar"), "el Archivo del Limbo no invita a entrar")
+press("return", 2)
+assert(scene() == "visit", "Enter en el Archivo del Limbo no entró a la casa")
+assert(Game.current().world:resource("dayPhase").demonId == "azazel", "adentro del Archivo no está Azazel")
+stub.clear()
+tick(60)
+assert(stub.find("Azazel"), "la visita no muestra a Azazel")
+local statsBeforeTalking = run.stats.astucia
+talk()
+assert(scene() == "map", "terminar la conversación no volvió al mapa, estoy en " .. scene())
+assert(focus() == "archivo", "volver de la visita no dejó al jugador frente al Archivo")
+assert(run.actionsLeft == Run.ACTIONS - 1, "visitar a Azazel no gastó una acción")
+assert(run.stats.astucia == statsBeforeTalking, "hablar subió una stat: eso solo lo hace entrenar")
+local used = 0
+for _ in pairs(run.talks.azazel) do used = used + 1 end
+assert(used == 1, "hablar no marcó la conversación como usada")
+
+standAt("salon")
+press("return", 2)
+assert(scene() == "visit", "Enter en el Salón Carmesí no entró a la casa")
+talk()
+assert(scene() == "pack", "gastar las dos acciones visitando no abrió el paquete, estoy en " .. scene())
+assert(run.day == 2, "el día no avanzó después de dos visitas")
+local visits = 0
+for _, e in ipairs(run.log) do if e.day == 1 and e.kind == "visit" then visits = visits + 1 end end
+assert(visits == Run.ACTIONS, "el día 1 no registró las dos visitas")
+for _, card in ipairs(run.cards) do
+    assert(card.name and card.stat and card.power and card.rarity and card.effect,
+        "una carta de la colección está incompleta")
+end
+leavePack()
+assert(scene() == "room", "salir del paquete no volvió a la celda")
+local cardsBeforeTraining = #run.cards
+
 local furiaBefore = run.stats.furia
 local trainingDays = 0
 while run.day <= Run.DAYS do
@@ -100,10 +157,10 @@ end
 
 assert(run.stats.furia == furiaBefore + trainingDays * TrainingSystem.GAIN,
     "entrenar no subió la stat " .. TrainingSystem.GAIN .. " por día, quedó en " .. run.stats.furia)
-assert(#run.cards == 0, "entrenar dio cartas")
+assert(#run.cards == cardsBeforeTraining, "entrenar dio cartas")
 assert(run.day == Run.DAYS + 1, "la semana no terminó")
 assert(scene() == "menu", "después del día 7 no se salió de la semana")
-assert(#run.log == trainingDays, "el log no cuadra con las acciones gastadas")
+assert(#run.log == Run.ACTIONS + trainingDays, "el log no cuadra con las acciones gastadas")
 
 local flat = {}
 local function scan(value, path, depth)
@@ -127,10 +184,6 @@ for _, name in ipairs({ "Tu celda", "Archivo del Limbo", "Salón Carmesí", "Cal
     assert(stub.find(name), "el mapa no dibujó " .. name)
 end
 
-local function player()
-    local world = Game.current().world
-    return world:getComponent(world:query("player", "position")[1], "position")
-end
 local function hold(key, n)
     stub.hold(key) tick(n) stub.release()
 end
@@ -156,25 +209,28 @@ stub.release()
 local moved = math.sqrt((player().x - 42) ^ 2 + (player().y - 298) ^ 2)
 assert(close(moved, 80), ("la diagonal no camina a la misma velocidad: %.2f px"):format(moved))
 
-local function focus() return Game.current().world:resource("mapFocus").placeId end
-local function standAt(id)
-    local door = map.places[id].door
-    local pos = player()
-    pos.x, pos.y = (door.x - 0.5) * map.cell, (door.y - 0.5) * map.cell
-    stub.clear()
-    tick(1)
-end
-
 assert(focus() == nil, "lejos de las puertas igual hay un lugar enfocado")
 standAt("salon")
 assert(focus() == "salon", "pararse en la puerta del Salón Carmesí no lo enfocó")
 assert(stub.find("Lilim"), "el cartel del Salón Carmesí no nombra a Lilim")
-press("return", 1)
-assert(scene() == "map", "Enter en una casa sacó del mapa antes de tiempo")
+press("return", 2)
+assert(scene() == "visit", "Enter en el Salón Carmesí no entró a la casa")
+Game.start("map")
+tick(1)
 standAt("puerta")
 assert(stub.find("Todavía no"), "la Puerta del Guardián no avisa que está cerrada")
 press("return", 1)
 assert(scene() == "map", "la Puerta del Guardián dejó pasar")
+
+local demons = require("src.data.demons")
+local Talk = require("src.rules.Talk")
+for _, conversation in ipairs(demons.brasa.conversations) do
+    Talk.use(run, demons.brasa, conversation)
+end
+standAt("calderas")
+assert(stub.find("Brasa ya te contó todo"), "las Calderas no avisan que Brasa ya contó todo")
+press("return", 2)
+assert(scene() == "map", "se pudo entrar a hablar con Brasa sin conversaciones pendientes")
 
 standAt("celda")
 assert(focus() == "celda", "la puerta de tu celda no se enfocó")

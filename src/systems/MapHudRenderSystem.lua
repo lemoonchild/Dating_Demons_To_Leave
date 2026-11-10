@@ -26,7 +26,7 @@ local function promptFor(place, runState)
         if not Talk.hasAny(runState, demon) then
             return demon.name .. " ya te contó todo lo que sabe"
         end
-        return place.name .. ": " .. demon.name .. " está adentro. Pronto podrás entrar."
+        return place.name .. ": " .. demon.name .. " está adentro. Presiona Enter para entrar."
     end
     return "La " .. place.name .. " sigue cerrada. Todavía no puedes abrirla."
 end

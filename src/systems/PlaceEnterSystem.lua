@@ -1,4 +1,6 @@
 local map = require("src.data.map")
+local demons = require("src.data.demons")
+local Talk = require("src.rules.Talk")
 
 local PlaceEnterSystem = { name = "placeEnter" }
 
@@ -13,8 +15,12 @@ function PlaceEnterSystem.update(scene, dt)
         local key = world:getComponent(entity, "keyPressed").key
         if key == "escape" then
             world:spawn({ switchRequest = { to = PlaceEnterSystem.HOME } })
-        elseif (key == "return" or key == "space" or key == "e") and place and place.kind == "home" then
-            world:spawn({ switchRequest = { to = PlaceEnterSystem.HOME } })
+        elseif (key == "return" or key == "space" or key == "e") and place then
+            if place.kind == "home" then
+                world:spawn({ switchRequest = { to = PlaceEnterSystem.HOME } })
+            elseif place.kind == "demon" and Talk.hasAny(world:resource("runState"), demons[place.demonId]) then
+                world:spawn({ switchRequest = { to = "visit", payload = { placeId = place.id } } })
+            end
         end
     end
 end

@@ -1,4 +1,3 @@
-local DemonArt = require("src.graphics.DemonArt")
 local Mood = require("src.rules.Mood")
 local DialogueLayout = require("src.ui.DialogueLayout")
 local DialogueInputSystem = require("src.systems.DialogueInputSystem")
@@ -10,7 +9,6 @@ local fonts = {}
 local BOX = DialogueLayout.BOX
 local TAG = DialogueLayout.TAG
 local MOODTAG = DialogueLayout.MOODTAG
-local PORTRAIT = DialogueLayout.PORTRAIT
 local TEXT_X = DialogueLayout.TEXT_X
 local TEXT_W = DialogueLayout.TEXT_W
 local OPTIONS_Y = DialogueLayout.OPTIONS_Y
@@ -96,8 +94,6 @@ function DialogueRenderSystem.draw(scene)
     love.graphics.rectangle("fill", BOX.x, BOX.y, BOX.w, BOX.h)
     love.graphics.setColor(1, 1, 1, 1)
     love.graphics.rectangle("line", BOX.x, BOX.y, BOX.w, BOX.h)
-
-    DemonArt.draw(demon, PORTRAIT.x + PORTRAIT.w / 2, PORTRAIT.y + PORTRAIT.h, PORTRAIT.w, PORTRAIT.h)
 
     love.graphics.setFont(fonts.text)
     love.graphics.setColor(1, 0.95, 0.9, 1)
