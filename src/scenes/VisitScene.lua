@@ -5,6 +5,7 @@ local map = require("src.data.map")
 local MoodRollSystem = require("src.systems.MoodRollSystem")
 local DialogueInputSystem = require("src.systems.DialogueInputSystem")
 local AffinitySystem = require("src.systems.AffinitySystem")
+local CompanySystem = require("src.systems.CompanySystem")
 local DayLoopSystem = require("src.systems.DayLoopSystem")
 local DayCloseSystem = require("src.systems.DayCloseSystem")
 local VisitExitSystem = require("src.systems.VisitExitSystem")
@@ -24,14 +25,15 @@ return function(payload)
     world:setResource("visit", { placeId = place.id })
 
     world:spawn({
-        position = { x = 170, y = 314 },
-        demonSprite = { demonId = place.demonId, w = 90, h = 180 },
+        position = { x = 200, y = 495 },
+        demonSprite = { demonId = place.demonId, w = 180, h = 360 },
     })
     world:spawn({ event = true, actionPicked = { kind = "visit", demonId = place.demonId } })
 
     scene:addSystem(MoodRollSystem)
     scene:addSystem(DialogueInputSystem)
     scene:addSystem(AffinitySystem)
+    scene:addSystem(CompanySystem)
     scene:addSystem(DayLoopSystem)
     scene:addSystem(DayCloseSystem)
     scene:addSystem(VisitExitSystem)

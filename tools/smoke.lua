@@ -59,6 +59,10 @@ assert(scene() == "room", "Jugar no llevó a la celda")
 local run = Run.current()
 assert(actionsLeft() == Run.ACTIONS, "el día no arrancó con " .. Run.ACTIONS .. " acciones")
 assert(roomMenu().screen == "main", "la celda no abrió en el menú principal")
+local roomLoaded = {}
+for _, path in ipairs(stub.images) do roomLoaded[path] = true end
+assert(roomLoaded[map.places.celda.background], "la celda no cargó su fondo")
+assert(roomLoaded["assets/characters/jugador.png"], "la celda no dibujó al jugador")
 
 press("return", 1)
 assert(roomMenu().screen == "training", "Entrenar no abrió el panel de entrenamiento")
@@ -96,8 +100,16 @@ assert(scene() == "room", "salir de la colección no volvió a la celda")
 press("2", 2)
 standAt("archivo")
 assert(stub.find("Presiona Enter para entrar"), "el Archivo del Limbo no invita a entrar")
+for _, path in ipairs(stub.images) do
+    assert(path == "assets/characters/jugador.png" or not path:find("assets/characters/", 1, true),
+        "el mapa dibuja a los demonios: " .. path)
+end
 press("return", 2)
 assert(scene() == "visit", "Enter en el Archivo del Limbo no entró a la casa")
+local loaded = {}
+for _, path in ipairs(stub.images) do loaded[path] = true end
+assert(loaded["assets/characters/azazel.png"], "entrar al Archivo no cargó el sprite de Azazel")
+assert(loaded[map.places.archivo.background], "entrar al Archivo no cargó su fondo")
 assert(Game.current().world:resource("dayPhase").demonId == "azazel", "adentro del Archivo no está Azazel")
 stub.clear()
 tick(60)
@@ -111,6 +123,10 @@ assert(run.stats.astucia == statsBeforeTalking, "hablar subió una stat: eso sol
 local used = 0
 for _ in pairs(run.talks.azazel) do used = used + 1 end
 assert(used == 1, "hablar no marcó la conversación como usada")
+standAt("archivo")
+assert(stub.find("ya no tiene ganas de hablar hoy"), "el Archivo no avisa que Azazel ya habló hoy")
+press("return", 2)
+assert(scene() == "map", "se pudo visitar a Azazel dos veces el mismo día")
 
 standAt("salon")
 press("return", 2)
@@ -133,12 +149,30 @@ local furiaBefore = run.stats.furia
 local trainingDays = 0
 while run.day <= Run.DAYS do
     local d = run.day
+    local halfDay = d == Run.DAYS
+    if halfDay then
+        assert(#run.cards == cardsBeforeTraining, "entrenar dio cartas")
+        press("2", 2)
+        standAt("calderas")
+        press("return", 2)
+        assert(scene() == "visit", "Enter en las Calderas no entró a la casa")
+        talk()
+        standAt("celda")
+        press("return", 2)
+        assert(scene() == "room", "volver a la celda después de visitar no funcionó")
+        assert(actionsLeft() == Run.ACTIONS - 1, "visitar antes de entrenar no gastó una acción")
+    end
     press("1", 1)
+    stub.clear()
+    tick(1)
+    local expected = TrainingSystem.gainFor(actionsLeft())
+    assert(stub.find("+" .. expected .. " furia"), "el panel no muestra que entrenar da +" .. expected)
     press("3", 2)
     assert(scene() == "pack", "entrenar no cerró el día " .. d .. ", estoy en " .. scene())
     local dayLog = 0
     for _, e in ipairs(run.log) do if e.day == d then dayLog = dayLog + 1 end end
-    assert(dayLog == 1, "el día de entrenamiento registró " .. dayLog .. " acciones, esperaba 1")
+    local wanted = halfDay and 2 or 1
+    assert(dayLog == wanted, "el día " .. d .. " registró " .. dayLog .. " acciones, esperaba " .. wanted)
     trainingDays = trainingDays + 1
 
     if d == 1 then
@@ -155,12 +189,16 @@ while run.day <= Run.DAYS do
     end
 end
 
-assert(run.stats.furia == furiaBefore + trainingDays * TrainingSystem.GAIN,
-    "entrenar no subió la stat " .. TrainingSystem.GAIN .. " por día, quedó en " .. run.stats.furia)
-assert(#run.cards == cardsBeforeTraining, "entrenar dio cartas")
+local furiaWanted = furiaBefore + (trainingDays - 1) * TrainingSystem.gainFor(Run.ACTIONS)
+    + TrainingSystem.gainFor(Run.ACTIONS - 1)
+assert(run.stats.furia == furiaWanted,
+    "entrenar no subió la stat según las acciones que quedaban, quedó en " .. run.stats.furia
+    .. " y esperaba " .. furiaWanted)
+assert(TrainingSystem.gainFor(Run.ACTIONS) > TrainingSystem.gainFor(Run.ACTIONS - 1),
+    "entrenar el día entero no rinde más que medio día")
 assert(run.day == Run.DAYS + 1, "la semana no terminó")
 assert(scene() == "menu", "después del día 7 no se salió de la semana")
-assert(#run.log == Run.ACTIONS + trainingDays, "el log no cuadra con las acciones gastadas")
+assert(#run.log == Run.ACTIONS + trainingDays + 1, "el log no cuadra con las acciones gastadas")
 
 local flat = {}
 local function scan(value, path, depth)
@@ -231,6 +269,23 @@ standAt("calderas")
 assert(stub.find("Brasa ya te contó todo"), "las Calderas no avisan que Brasa ya contó todo")
 press("return", 2)
 assert(scene() == "map", "se pudo entrar a hablar con Brasa sin conversaciones pendientes")
+
+run.affinity.lilim = 0
+for _, conversation in ipairs(demons.lilim.conversations) do
+    if conversation.minAffinity == nil then Talk.use(run, demons.lilim, conversation) end
+end
+standAt("salon")
+assert(stub.find("hacerle compañía"), "el Salón no invita a hacerle compañía a Lilim")
+press("return", 2)
+assert(scene() == "visit", "con partes bloqueadas no se pudo entrar a hacerle compañía a Lilim")
+stub.clear()
+tick(240)
+assert(stub.find("compañía a Lilim"), "la visita no dice que se quedó haciéndole compañía")
+assert(run.affinity.lilim == 1, "hacerle compañía no subió la afinidad en 1, quedó en " .. run.affinity.lilim)
+talk()
+assert(scene() == "map", "terminar la visita de compañía no volvió al mapa")
+standAt("salon")
+assert(stub.find("ya no tiene ganas de hablar hoy"), "después de hacerle compañía se puede volver a entrar")
 
 standAt("celda")
 assert(focus() == "celda", "la puerta de tu celda no se enfocó")

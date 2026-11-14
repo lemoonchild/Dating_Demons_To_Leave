@@ -1,4 +1,4 @@
-local stub = { drawn = {}, held = {} }
+local stub = { drawn = {}, held = {}, images = {} }
 
 local font = {}
 function font:getHeight() return 14 end
@@ -19,6 +19,14 @@ function stub.install()
             push = function() end, pop = function() end,
             origin = function() end, translate = function() end, scale = function() end,
             captureScreenshot = function() end,
+            draw = function() end,
+            newImage = function(path)
+                stub.images[#stub.images + 1] = path
+                return {
+                    getDimensions = function() return 45, 90 end,
+                    setFilter = function() end,
+                }
+            end,
         },
         mouse = { getPosition = function() return 0, 0 end, isDown = function() return false end },
         keyboard = {
@@ -31,7 +39,15 @@ function stub.install()
         },
         event = { quit = function() end },
         math = { random = function(n) return math.random(n) end },
-        filesystem = { getSaveDirectory = function() return "/tmp" end },
+        filesystem = {
+            getSaveDirectory = function() return "/tmp" end,
+            getInfo = function(path)
+                local file = io.open(path, "rb")
+                if not file then return nil end
+                file:close()
+                return { type = "file" }
+            end,
+        },
     }
     return love
 end

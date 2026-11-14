@@ -4,7 +4,8 @@ local fonts = {}
 
 local LIFE = 1.6
 local RISE = 30
-local START = 0.6
+local START = 0.8
+local SIDE = 0.45
 
 function ReactionPopupSystem.setup(scene)
     fonts.popup = love.graphics.newFont(26)
@@ -24,7 +25,7 @@ function ReactionPopupSystem.update(scene, dt)
             if sprite.demonId == applied.demonId then
                 local pos = world:getComponent(target, "position")
                 world:spawn({
-                    position = { x = pos.x, y = pos.y - (sprite.h or 96) * START },
+                    position = { x = pos.x + (sprite.w or 0) * SIDE, y = pos.y - (sprite.h or 96) * START },
                     popup = {
                         text = ("%+d"):format(applied.affinity),
                         life = LIFE,

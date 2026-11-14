@@ -33,10 +33,11 @@ local function playWeek(smart, record)
     for day = 1, Run.DAYS do
         Mood.roll(run, demons, random)
         local entries = {}
+        local seenToday = {}
         for _ = 1, Run.ACTIONS do
             local pool = {}
             for _, demon in ipairs(demons) do
-                if Talk.hasAny(run, demon) then pool[#pool + 1] = demon end
+                if Talk.hasLeft(run, demon) and not seenToday[demon.id] then pool[#pool + 1] = demon end
             end
             if #pool == 0 then break end
 
@@ -49,15 +50,20 @@ local function playWeek(smart, record)
                 end
             end
 
-            local conversation = Talk.pick(run, pick, random)
-            local option = smart and conversation.options[1]
-                or conversation.options[random(#conversation.options)]
-            local rolled = Reaction.roll(option.affinity, run.stats[pick.stat], conversation.demand, random)
-            local gain = Mood.scale(rolled.gain, run.moods[pick.id])
-            Affinity.apply(run, pick, option, gain)
-            Talk.use(run, pick, conversation)
+            seenToday[pick.id] = true
+            local conversation = Talk.pick(run, pick)
+            local option = conversation and (smart and conversation.options[1]
+                or conversation.options[random(#conversation.options)])
+            local rolled = option and Reaction.roll(option.affinity, run.stats[pick.stat], conversation.demand, random)
+            local gain = rolled and Mood.scale(rolled.gain, run.moods[pick.id])
+            if conversation then
+                Affinity.apply(run, pick, option, gain)
+                Talk.use(run, pick, conversation)
+            else
+                Affinity.apply(run, pick, nil, Affinity.COMPANY)
+            end
 
-            if record then
+            if record and conversation then
                 rolls[#rolls + 1] = {
                     day, pick.id, run.moods[pick.id], conversation.demand,
                     run.stats[pick.stat], rolled.spread, rolled.roll, gain, run.affinity[pick.id],

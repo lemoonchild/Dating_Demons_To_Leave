@@ -1,10 +1,19 @@
 local Screen = require("src.Screen")
+local map = require("src.data.map")
+local Images = require("src.graphics.Images")
+local PlaceArt = require("src.graphics.PlaceArt")
 
 local RoomArt = {}
 
 RoomArt.FLOOR_Y = 300
 
 function RoomArt.draw()
+    local image = Images.load(map.places.celda.background)
+    if image then
+        PlaceArt.backdrop(image)
+        return
+    end
+
     love.graphics.setColor(0.14, 0.07, 0.1, 1)
     love.graphics.rectangle("fill", 0, 0, Screen.w, Screen.h)
     love.graphics.setColor(0.22, 0.1, 0.08, 1)

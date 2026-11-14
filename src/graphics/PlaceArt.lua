@@ -1,6 +1,7 @@
 local Screen = require("src.Screen")
 local demons = require("src.data.demons")
-local DemonArt = require("src.graphics.DemonArt")
+local map = require("src.data.map")
+local Images = require("src.graphics.Images")
 
 local PlaceArt = {}
 
@@ -49,12 +50,6 @@ function PlaceArt.draw(place, building, area, font, focused)
         love.graphics.rectangle("line", area.x + 1, area.y + 1, area.w - 2, area.h - 2)
         love.graphics.rectangle("line", area.x + 3, area.y + 3, area.w - 6, area.h - 6)
         love.graphics.rectangle("line", dx - 2, dy - 2, dw + 4, dh + 4)
-    end
-
-    if place.kind == "demon" then
-        local doorCenter = area.x + area.w / 2
-        local side = doorCenter < building.x + building.w / 2 and building.x + building.w - 22 or building.x + 22
-        DemonArt.draw(demons[place.demonId], side, building.y + building.h - 6, 18, 34)
     end
 
     love.graphics.setFont(font)
@@ -112,7 +107,22 @@ end
 
 local PROPS = { archivo = shelves, salon = curtains, calderas = forge }
 
+function PlaceArt.backdrop(image)
+    local iw, ih = image:getDimensions()
+    local scale = math.max(Screen.w / iw, Screen.h / ih)
+    if scale >= 1 then scale = math.ceil(scale) end
+    love.graphics.setColor(1, 1, 1, 1)
+    love.graphics.draw(image, math.floor((Screen.w - iw * scale) / 2), math.floor((Screen.h - ih * scale) / 2),
+        0, scale, scale)
+end
+
 function PlaceArt.interior(placeId)
+    local image = Images.load(map.places[placeId].background)
+    if image then
+        PlaceArt.backdrop(image)
+        return
+    end
+
     local room = INTERIORS[placeId]
     love.graphics.setColor(room.wall[1], room.wall[2], room.wall[3], 1)
     love.graphics.rectangle("fill", 0, 0, Screen.w, Screen.h)

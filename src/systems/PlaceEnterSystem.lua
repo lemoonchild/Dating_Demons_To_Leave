@@ -18,7 +18,7 @@ function PlaceEnterSystem.update(scene, dt)
         elseif (key == "return" or key == "space" or key == "e") and place then
             if place.kind == "home" then
                 world:spawn({ switchRequest = { to = PlaceEnterSystem.HOME } })
-            elseif place.kind == "demon" and Talk.hasAny(world:resource("runState"), demons[place.demonId]) then
+            elseif place.kind == "demon" and Talk.canVisit(world:resource("runState"), demons[place.demonId]) then
                 world:spawn({ switchRequest = { to = "visit", payload = { placeId = place.id } } })
             end
         end

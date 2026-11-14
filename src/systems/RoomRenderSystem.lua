@@ -3,14 +3,12 @@ local PlayerArt = require("src.graphics.PlayerArt")
 
 local RoomRenderSystem = { name = "roomRender" }
 
+RoomRenderSystem.PLAYER_H = 180
+
 function RoomRenderSystem.draw(scene)
     RoomArt.draw()
 
-    love.graphics.push()
-    love.graphics.translate(480, RoomArt.FLOOR_Y)
-    love.graphics.scale(2.5)
-    PlayerArt.draw(0, -10, 20, 20)
-    love.graphics.pop()
+    PlayerArt.drawStanding(480, RoomArt.FLOOR_Y, RoomRenderSystem.PLAYER_H)
 end
 
 return RoomRenderSystem

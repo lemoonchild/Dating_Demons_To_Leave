@@ -24,16 +24,17 @@ function DialogueInputSystem.optionsOf(dialogue)
     return conversation and conversation.options
 end
 
-local function openLine(dialogue, runState)
+local function openLine(scene, dialogue, runState)
     local demon = DialogueInputSystem.demonOf(dialogue)
-    local conversation = Talk.pick(runState, demon, love.math.random)
+    local conversation = Talk.pick(runState, demon)
     dialogue.conversationId = conversation and conversation.id
     if conversation then
         dialogue.stage = "line"
         dialogue.text = conversation.line
     else
         dialogue.stage = "done"
-        dialogue.text = demon.name .. " ya te contó todo lo que sabe. Busca a otro demonio."
+        dialogue.text = Talk.quietLine(runState, demon)
+        scene.world:spawn({ event = true, companyKept = { demonId = demon.id } })
     end
     dialogue.visible = 0
     dialogue.cursor = 1
@@ -82,7 +83,7 @@ function DialogueInputSystem.update(scene, dt)
 
     if dialogue.demonId ~= phase.demonId then
         dialogue.demonId = phase.demonId
-        openLine(dialogue, runState)
+        openLine(scene, dialogue, runState)
     end
 
     dialogue.visible = math.min(#dialogue.text,

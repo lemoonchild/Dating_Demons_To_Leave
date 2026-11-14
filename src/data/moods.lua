@@ -3,7 +3,7 @@ local moods = {
     { id = "receptivo", name = "Receptivo", hint = "Está de buen talante", gain = 1.25, loss = 0.75, quality = 1, color = { 0.45, 0.85, 0.50 } },
     { id = "neutral",   name = "Neutral",   hint = "Ni para bien ni para mal",   gain = 1.0,  loss = 1.0, quality =  0, color = { 0.70, 0.70, 0.70 } },
     { id = "arisco",    name = "Arisco",    hint = "Tiene poca paciencia hoy",    gain = 0.5,  loss = 1.5, quality = -1, color = { 0.90, 0.55, 0.30 } },
-    { id = "furioso",   name = "Furioso",   hint = "Un paso en falso y lo perdés",   gain = 0.25, loss = 2.0, quality = -2, color = { 0.90, 0.25, 0.25 } },
+    { id = "furioso",   name = "Furioso",   hint = "Un paso en falso y lo pierdes",   gain = 0.25, loss = 2.0, quality = -2, color = { 0.90, 0.25, 0.25 } },
 }
 
 for _, mood in ipairs(moods) do

@@ -33,10 +33,10 @@ function PackRevealRenderSystem.subtitle(entries, empty)
     end
     for _, entry in ipairs(entries) do
         if entry.kind == "visit" then
-            return "Nadie quiso darte nada. Así son los días en que caés mal."
+            return "Nadie quiso darte nada. Así son los días en que caes mal."
         end
     end
-    return "Entrenaste todo el día. Sos mejor que ayer, pero nadie te regaló nada."
+    return "Entrenaste todo el día. Eres mejor que ayer, pero nadie te regaló nada."
 end
 
 function PackRevealRenderSystem.draw(scene)

@@ -3,6 +3,7 @@ local Affinity = {}
 Affinity.MIN = -20
 Affinity.MAX = 20
 Affinity.THRESHOLDS = { 7, 13, 20 } -- umbral i -> carta i del demonio
+Affinity.COMPANY = 1
 
 -- Entrega la próxima carta que le queda al demonio, sin mirar umbrales.
 function Affinity.grant(runState, demon)

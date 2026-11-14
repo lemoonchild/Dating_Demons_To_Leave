@@ -31,9 +31,11 @@ function RoomMenuRenderSystem.unload(scene)
     fonts = {}
 end
 
-local function titleOf(menu, runState)
-    if menu.screen == "training" then
-        return "¿Qué quieres entrenar? Te toma el resto del día."
+local function titleOf(menu, runState, left)
+    if menu.screen == "training" and left < Run.ACTIONS then
+        return "¿Qué quieres entrenar? Te queda medio día, rinde menos."
+    elseif menu.screen == "training" then
+        return "¿Qué quieres entrenar? Te toma el día entero."
     end
     return ("Día %d de %d. ¿Qué vas a hacer hoy?"):format(runState.day, Run.DAYS)
 end
@@ -56,7 +58,7 @@ function RoomMenuRenderSystem.draw(scene)
     love.graphics.rectangle("line", BOX.x, BOX.y, BOX.w, BOX.h)
 
     love.graphics.setFont(fonts.title)
-    love.graphics.print(titleOf(menu, runState), BOX.x + 20, BOX.y + 14)
+    love.graphics.print(titleOf(menu, runState, phase.left), BOX.x + 20, BOX.y + 14)
     love.graphics.setFont(fonts.option)
     love.graphics.setColor(1, 0.85, 0.3, 1)
     love.graphics.printf(leftText(phase.left), BOX.x, BOX.y + 16, BOX.w - 20, "right")
@@ -77,7 +79,7 @@ function RoomMenuRenderSystem.draw(scene)
             hint = stat.description
             love.graphics.setFont(fonts.small)
             love.graphics.setColor(0.6, 0.6, 0.6, 1)
-            love.graphics.printf(("+%d %s"):format(TrainingSystem.GAIN, stat.name:lower()), x, y + 7, w - 16, "right")
+            love.graphics.printf(("+%d %s"):format(TrainingSystem.gainFor(phase.left), stat.name:lower()), x, y + 7, w - 16, "right")
         end
 
         love.graphics.setFont(fonts.option)

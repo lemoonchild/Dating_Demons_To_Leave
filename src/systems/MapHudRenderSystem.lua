@@ -23,8 +23,12 @@ local function promptFor(place, runState)
         return "Presiona Enter para volver a tu celda"
     elseif place.kind == "demon" then
         local demon = demons[place.demonId]
-        if not Talk.hasAny(runState, demon) then
+        if not Talk.hasLeft(runState, demon) then
             return demon.name .. " ya te contó todo lo que sabe"
+        elseif Talk.visitedToday(runState, demon) then
+            return demon.name .. " ya no tiene ganas de hablar hoy. Vuelve mañana."
+        elseif not Talk.hasAny(runState, demon) then
+            return demon.name .. " todavía no te tiene confianza. Presiona Enter para hacerle compañía."
         end
         return place.name .. ": " .. demon.name .. " está adentro. Presiona Enter para entrar."
     end

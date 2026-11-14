@@ -138,6 +138,16 @@ function DialogueRenderSystem.draw(scene)
         love.graphics.setFont(fonts.small)
         love.graphics.setColor(0.55, 0.55, 0.55, 1)
         love.graphics.print(describePick(picked), TEXT_X, OPTIONS_Y + 28)
+    elseif dialogue.stage == "done" then
+        local kept = world:resource("lastReaction")
+        if kept and kept.company then
+            love.graphics.setFont(fonts.option)
+            love.graphics.setColor(0.5, 1, 0.5, 1)
+            love.graphics.print("Te quedaste un rato haciéndole compañía a " .. demon.name, TEXT_X, OPTIONS_Y + 2)
+            love.graphics.setFont(fonts.small)
+            love.graphics.setColor(0.55, 0.55, 0.55, 1)
+            love.graphics.print(describePick(kept), TEXT_X, OPTIONS_Y + 28)
+        end
     end
 
     if dialogue.stage ~= "line" then
