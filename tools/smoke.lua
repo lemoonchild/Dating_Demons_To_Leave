@@ -101,7 +101,7 @@ press("2", 2)
 standAt("archivo")
 assert(stub.find("Presiona Enter para entrar"), "el Archivo del Limbo no invita a entrar")
 for _, path in ipairs(stub.images) do
-    assert(path == "assets/characters/jugador.png" or not path:find("assets/characters/", 1, true),
+    assert(path:find("assets/characters/jugador", 1, true) or not path:find("assets/characters/", 1, true),
         "el mapa dibuja a los demonios: " .. path)
 end
 press("return", 2)
@@ -218,7 +218,7 @@ Game.start("map")
 stub.clear()
 tick(2)
 assert(scene() == "map", "no se pudo abrir el mapa")
-for _, name in ipairs({ "Tu celda", "Archivo del Limbo", "Salón Carmesí", "Calderas", "Puerta del Guardián" }) do
+for _, name in ipairs({ "Tu celda", "Archivo del Limbo", "Salón Carmesí", "Calderas" }) do
     assert(stub.find(name), "el mapa no dibujó " .. name)
 end
 
@@ -227,24 +227,72 @@ local function hold(key, n)
 end
 local function close(a, b) return math.abs(a - b) < 0.01 end
 
-local start = player()
-local startX, startY = start.x, start.y
+local Iso = require("src.world.Iso")
+local function placeAt(x, y)
+    local pos = player()
+    pos.x, pos.y = (x - 0.5) * map.cell, (y - 0.5) * map.cell
+end
+local function onScreen()
+    local _, tilemap = Game.current().world:first("tilemap")
+    return Iso.toScreen(tilemap.view, tilemap.cell, player().x, player().y)
+end
+local function facing() local _, f = Game.current().world:first("facing") return f.dir end
+local function drewSprite(path)
+    for _, loaded in ipairs(stub.images) do
+        if loaded == path then return true end
+    end
+    return false
+end
+local function terrainHere()
+    local _, tilemap = Game.current().world:first("tilemap")
+    return tilemap.grid:terrain(math.floor(player().x / map.cell) + 1, math.floor(player().y / map.cell) + 1)
+end
+
+placeAt(28, 4)
+local startX, startY = player().x, player().y
+local sx, sy = onScreen()
 hold("right", 30)
-assert(close(player().x, startX + 80) and close(player().y, startY),
-    ("caminar medio segundo a la derecha no avanzó 80 px: %.2f"):format(player().x - startX))
+local nx, ny = onScreen()
+assert(close(nx - sx, 40 * math.sqrt(2)) and close(ny, sy),
+    ("la flecha derecha no camina recto a la derecha de la pantalla: %.2f, %.2f"):format(nx - sx, ny - sy))
+assert(close(math.sqrt((player().x - startX) ^ 2 + (player().y - startY) ^ 2), 80),
+    "caminar medio segundo no avanzó 80 px en el mapa")
 hold("left", 30)
-assert(close(player().x, startX), "volver a la izquierda no regresó al mismo lugar")
+assert(close(player().x, startX) and close(player().y, startY), "volver a la izquierda no regresó al mismo lugar")
+assert(facing() == "izq", "después de caminar a la izquierda no mira a la izquierda")
+assert(drewSprite("assets/characters/jugador_izq.png"), "el mapa no dibujó al jugador de lado")
 
-hold("w", 120)
-assert(close(player().y, 298) and close(player().x, startX),
-    ("la lava no detuvo al jugador: %.2f, %.2f"):format(player().x, player().y))
-hold("a", 120)
-assert(close(player().x, 42), ("el muro izquierdo no detuvo al jugador: %.2f"):format(player().x))
+hold("w", 30)
+nx, ny = onScreen()
+assert(close(nx, sx) and ny < sy, "la flecha arriba no camina recto hacia arriba de la pantalla")
+assert(facing() == "atras", "caminar hacia arriba no lo dejó de espaldas")
 
+placeAt(28, 2)
+stub.hold("left") stub.hold("up")
+tick(120)
+stub.release()
+assert(close(player().x, 24 * map.cell + 10) and terrainHere() == "floor",
+    ("la lava no detuvo al jugador: %.2f en %s"):format(player().x, tostring(terrainHere())))
+
+placeAt(28, 6)
+stub.hold("left") stub.hold("up")
+tick(120)
+stub.release()
+assert(close(player().x, 19 * map.cell + 10),
+    ("el puente no dejó cruzar la lava hasta las Calderas: %.2f"):format(player().x))
+
+placeAt(28, 4)
+stub.hold("up") stub.hold("right")
+tick(120)
+stub.release()
+assert(close(player().y, 10), ("la orilla del mapa no detuvo al jugador: %.2f"):format(player().y))
+
+placeAt(25, 3)
+startX, startY = player().x, player().y
 stub.hold("right") stub.hold("down")
 tick(30)
 stub.release()
-local moved = math.sqrt((player().x - 42) ^ 2 + (player().y - 298) ^ 2)
+local moved = math.sqrt((player().x - startX) ^ 2 + (player().y - startY) ^ 2)
 assert(close(moved, 80), ("la diagonal no camina a la misma velocidad: %.2f px"):format(moved))
 
 assert(focus() == nil, "lejos de las puertas igual hay un lugar enfocado")
@@ -255,10 +303,6 @@ press("return", 2)
 assert(scene() == "visit", "Enter en el Salón Carmesí no entró a la casa")
 Game.start("map")
 tick(1)
-standAt("puerta")
-assert(stub.find("Todavía no"), "la Puerta del Guardián no avisa que está cerrada")
-press("return", 1)
-assert(scene() == "map", "la Puerta del Guardián dejó pasar")
 
 local demons = require("src.data.demons")
 local Talk = require("src.rules.Talk")

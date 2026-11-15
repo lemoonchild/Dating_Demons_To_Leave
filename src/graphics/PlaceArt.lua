@@ -1,66 +1,21 @@
 local Screen = require("src.Screen")
-local demons = require("src.data.demons")
 local map = require("src.data.map")
 local Images = require("src.graphics.Images")
 
 local PlaceArt = {}
 
-local COLORS = {
-    home = { 0.35, 0.35, 0.45 },
-    door = { 0.05, 0.02, 0.03 },
-}
-
-local function colorOf(place)
-    if place.kind == "demon" then
-        local c = demons[place.demonId].color
-        return { c[1] * 0.55, c[2] * 0.55, c[3] * 0.55 }
-    end
-    return COLORS[place.kind]
-end
-
-local function doorRect(building, area)
-    local w = area.w - 12
-    local x = area.x + 6
-    if area.y >= building.y + building.h then
-        return x, building.y + building.h - 18, w, 18
-    end
-    return x, building.y, w, 18
-end
-
-function PlaceArt.draw(place, building, area, font, focused)
-    local color = colorOf(place)
-    love.graphics.setColor(color[1], color[2], color[3], 1)
-    love.graphics.rectangle("fill", building.x, building.y, building.w, building.h)
-
-    if place.kind == "door" then
-        love.graphics.setColor(0.8, 0.3, 0.15, 1)
-    else
-        love.graphics.setColor(1, 1, 1, 0.8)
-    end
-    love.graphics.rectangle("line", building.x, building.y, building.w, building.h)
-
-    local dx, dy, dw, dh = doorRect(building, area)
-    love.graphics.setColor(0.05, 0.02, 0.03, 1)
-    love.graphics.rectangle("fill", dx, dy, dw, dh)
-    love.graphics.setColor(0.8, 0.3, 0.15, 1)
-    love.graphics.rectangle("line", dx, dy, dw, dh)
-
+function PlaceArt.label(name, x, y, font, focused)
+    love.graphics.setFont(font)
+    local w = font:getWidth(name) + 12
+    local lx = math.floor(x - w / 2)
+    love.graphics.setColor(0.07, 0.03, 0.06, 0.85)
+    love.graphics.rectangle("fill", lx, y, w, 18)
     if focused then
         love.graphics.setColor(1, 0.85, 0.3, 1)
-        love.graphics.rectangle("line", area.x + 1, area.y + 1, area.w - 2, area.h - 2)
-        love.graphics.rectangle("line", area.x + 3, area.y + 3, area.w - 6, area.h - 6)
-        love.graphics.rectangle("line", dx - 2, dy - 2, dw + 4, dh + 4)
+        love.graphics.rectangle("line", lx, y, w, 18)
     end
-
-    love.graphics.setFont(font)
-    local labelW = font:getWidth(place.name) + 12
-    local lx = building.x + (building.w - labelW) / 2
-    local ly = area.y < building.y and building.y + building.h + 2 or building.y - 20
-    love.graphics.setColor(0.07, 0.03, 0.06, 0.85)
-    love.graphics.rectangle("fill", lx, ly, labelW, 18)
     love.graphics.setColor(1, 0.95, 0.9, 1)
-    love.graphics.printf(place.name, lx, ly + 2, labelW, "center")
-
+    love.graphics.printf(name, lx, y + 2, w, "center")
     love.graphics.setColor(1, 1, 1, 1)
 end
 

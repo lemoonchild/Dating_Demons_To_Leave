@@ -9,7 +9,7 @@ function MovementSystem.update(scene, dt)
         local velocity = world:getComponent(entity, "velocity")
         local speed = world:getComponent(entity, "walker").speed
 
-        local dx, dy = Movement.direction(intent.dx, intent.dy)
+        local dx, dy = Movement.isoDirection(intent.dx, intent.dy)
         velocity.x = dx * speed
         velocity.y = dy * speed
     end

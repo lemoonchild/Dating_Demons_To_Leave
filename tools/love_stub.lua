@@ -14,7 +14,8 @@ function stub.install()
         graphics = {
             newFont = function() return font end,
             print = record, printf = record,
-            rectangle = function() end, line = function() end,
+            rectangle = function() end, line = function() end, polygon = function() end,
+            newQuad = function() return {} end,
             setColor = function() end, setFont = function() end,
             push = function() end, pop = function() end,
             origin = function() end, translate = function() end, scale = function() end,

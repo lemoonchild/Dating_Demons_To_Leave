@@ -3,6 +3,7 @@ local Images = require("src.graphics.Images")
 local PlayerArt = {}
 
 PlayerArt.SPRITE = "assets/characters/jugador.png"
+PlayerArt.WALK_SCALE = 1
 
 function PlayerArt.draw(x, y, w, h)
     love.graphics.setColor(0.95, 0.9, 0.8, 1)
@@ -25,6 +26,22 @@ function PlayerArt.drawStanding(x, y, h)
     love.graphics.scale(2.5)
     PlayerArt.draw(0, -10, 20, 20)
     love.graphics.pop()
+end
+
+function PlayerArt.walkSprite(dir)
+    return Images.load("assets/characters/jugador_" .. (dir or "enfrente") .. ".png")
+end
+
+function PlayerArt.drawWalking(dir, x, y)
+    local image = PlayerArt.walkSprite(dir)
+    if not image then
+        PlayerArt.draw(x, y - 10, 20, 20)
+        return
+    end
+
+    local _, ih = image:getDimensions()
+    Images.drawStanding(image, x, y, ih * PlayerArt.WALK_SCALE)
+    love.graphics.setColor(1, 1, 1, 1)
 end
 
 return PlayerArt

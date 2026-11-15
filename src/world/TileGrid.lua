@@ -1,17 +1,22 @@
 local TileGrid = {}
 TileGrid.__index = TileGrid
 
+function TileGrid.new(width, height, cells, tiles)
+    return setmetatable({ width = width, height = height, tiles = tiles, cells = cells }, TileGrid)
+end
+
 function TileGrid.fromRows(rows, tiles)
-    local grid = setmetatable({ width = #rows[1], height = #rows, tiles = tiles, cells = {} }, TileGrid)
+    local width = #rows[1]
+    local cells = {}
     for y, row in ipairs(rows) do
-        assert(#row == grid.width, ("la fila %d del mapa tiene otro ancho"):format(y))
-        for x = 1, grid.width do
+        assert(#row == width, ("la fila %d del mapa tiene otro ancho"):format(y))
+        for x = 1, width do
             local glyph = row:sub(x, x)
             assert(tiles[glyph], ("glifo desconocido %q en %d,%d"):format(glyph, x, y))
-            grid.cells[(y - 1) * grid.width + x] = glyph
+            cells[(y - 1) * width + x] = glyph
         end
     end
-    return grid
+    return TileGrid.new(width, #rows, cells, tiles)
 end
 
 function TileGrid:inBounds(x, y)
@@ -24,13 +29,13 @@ function TileGrid:get(x, y)
 end
 
 function TileGrid:terrain(x, y)
-    local glyph = self:get(x, y)
-    return glyph and self.tiles[glyph].terrain
+    local key = self:get(x, y)
+    return key and self.tiles[key].terrain
 end
 
 function TileGrid:solid(x, y)
-    local glyph = self:get(x, y)
-    return glyph == nil or self.tiles[glyph].solid
+    local key = self:get(x, y)
+    return key == nil or self.tiles[key].solid
 end
 
 return TileGrid

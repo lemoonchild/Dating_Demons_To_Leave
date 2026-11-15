@@ -1,17 +1,21 @@
 local Scene = require("src.ecs.Scene")
+local Screen = require("src.Screen")
 local Run = require("src.state.Run")
-local TileGrid = require("src.world.TileGrid")
+local Iso = require("src.world.Iso")
+local TiledMap = require("src.world.TiledMap")
 local map = require("src.data.map")
 
 local MoodRollSystem = require("src.systems.MoodRollSystem")
 local MapInputSystem = require("src.systems.MapInputSystem")
 local MovementSystem = require("src.systems.MovementSystem")
+local FacingSystem = require("src.systems.FacingSystem")
 local TileCollisionSystem = require("src.systems.TileCollisionSystem")
 local PlaceProximitySystem = require("src.systems.PlaceProximitySystem")
 local PlaceEnterSystem = require("src.systems.PlaceEnterSystem")
-local MapRenderSystem = require("src.systems.MapRenderSystem")
-local PlaceRenderSystem = require("src.systems.PlaceRenderSystem")
-local PlayerRenderSystem = require("src.systems.PlayerRenderSystem")
+local GroundRenderSystem = require("src.systems.GroundRenderSystem")
+local DoorMarkerRenderSystem = require("src.systems.DoorMarkerRenderSystem")
+local DepthRenderSystem = require("src.systems.DepthRenderSystem")
+local PlaceLabelRenderSystem = require("src.systems.PlaceLabelRenderSystem")
 local MapHudRenderSystem = require("src.systems.MapHudRenderSystem")
 
 local function cellRect(x, y, w, h)
@@ -24,12 +28,22 @@ return function(payload)
 
     world:setResource("runState", Run.current())
 
-    world:spawn({ tilemap = { grid = TileGrid.fromRows(map.rows, map.tiles), cell = map.cell } })
+    local floor, raised = TiledMap.pieces(map.tiled)
+    world:spawn({
+        tilemap = {
+            grid = TiledMap.grid(map.tiled, map.ground, map.tiles),
+            cell = map.cell,
+            view = Iso.view(map.tiled, Screen.w, Screen.h),
+            tileset = TiledMap.tileset(map.tiled, map.folder),
+            floor = floor,
+            raised = raised,
+        },
+    })
 
     for _, place in ipairs(map.places) do
         world:spawn({
             place = { id = place.id, name = place.name, kind = place.kind, demonId = place.demonId },
-            building = cellRect(place.rect.x, place.rect.y, place.rect.w, place.rect.h),
+            door = { x = place.door.x, y = place.door.y },
             area = cellRect(place.door.x, place.door.y, 1, 1),
         })
     end
@@ -42,18 +56,21 @@ return function(payload)
         body = { w = 20, h = 20 },
         moveIntent = { dx = 0, dy = 0 },
         velocity = { x = 0, y = 0 },
+        facing = { dir = "enfrente" },
         walker = { speed = 160 },
     })
 
     scene:addSystem(MoodRollSystem)
     scene:addSystem(MapInputSystem)
     scene:addSystem(MovementSystem)
+    scene:addSystem(FacingSystem)
     scene:addSystem(TileCollisionSystem)
     scene:addSystem(PlaceProximitySystem)
     scene:addSystem(PlaceEnterSystem)
-    scene:addSystem(MapRenderSystem)
-    scene:addSystem(PlaceRenderSystem)
-    scene:addSystem(PlayerRenderSystem)
+    scene:addSystem(GroundRenderSystem)
+    scene:addSystem(DoorMarkerRenderSystem)
+    scene:addSystem(DepthRenderSystem)
+    scene:addSystem(PlaceLabelRenderSystem)
     scene:addSystem(MapHudRenderSystem)
 
     return scene
